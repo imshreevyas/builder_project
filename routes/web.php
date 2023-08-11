@@ -91,7 +91,7 @@ Route::prefix('admin')->group(function () {
     })->name('settings');
     
     
-    // Post Routes sad
+    // Post Routes
     Route::post('/adminLoginPost',[Controller::class,'adminLoginPost']);
     Route::post('/addPackage',[Controller::class,'addPackage']);
     Route::post('/addUserPackage',[Controller::class,'addUserPackage']);
@@ -107,14 +107,3 @@ Route::prefix('admin')->group(function () {
     Route::post('/settings',[Controller::class,'settings'])->name('settings');
     Route::get('/adminLogout',[Controller::class,'adminLogout'])->name('adminLogout');
 });
-
-
-
-// Frontend Routes
-
-// Route::get('/', [Controller::class, 'home']);
-// Route::get('/azerbaijan', [Controller::class, 'azerbaijan']);
-// Route::get('/georgia', [Controller::class, 'georgia']);
-// Route::get('/about-us', [Controller::class, 'aboutus']);
-// Route::get('/contact', [Controller::class, 'contact']);
-// Route::post('/sendDetails', [Controller::class, 'contact']);
