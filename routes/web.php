@@ -91,7 +91,7 @@ Route::prefix('admin')->group(function () {
     })->name('settings');
     
     
-    // Post Routes
+    // Post Routes sad
     Route::post('/adminLoginPost',[Controller::class,'adminLoginPost']);
     Route::post('/addPackage',[Controller::class,'addPackage']);
     Route::post('/addUserPackage',[Controller::class,'addUserPackage']);
