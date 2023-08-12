@@ -83,7 +83,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/login',[Controller::class,'adminLogin'])->name('adminLogin');
     Route::get('/dashboard',[Controller::class,'adminDashboard'])->name('adminDashboard');
     Route::get('/allUsers',[Controller::class,'allUsers'])->name('allUsers');
-    Route::get('/allPackages',[Controller::class,'allPackages'])->name('allPackages');
+    Route::get('/allProperties',[Controller::class,'allProperties'])->name('allProperties');
     Route::get('/allSupport',[Controller::class,'allSupport'])->name('allSupport');
     Route::get('/myAccount',[Controller::class,'myAccount'])->name('myAccount');
     Route::get('/settings',function(){
@@ -93,9 +93,10 @@ Route::prefix('admin')->group(function () {
     
     // Post Routes
     Route::post('/adminLoginPost',[Controller::class,'adminLoginPost']);
-    Route::post('/addPackage',[Controller::class,'addPackage']);
+    Route::post('/addProperty',[Controller::class,'addProperty']);
     Route::post('/addUserPackage',[Controller::class,'addUserPackage']);
     Route::post('/addUser',[Controller::class,'addUser']);
+    Route::post('/deleteProperty',[Controller::class,'deleteProperty']);
     Route::post('/deletePackage',[Controller::class,'deletePackage']);
     Route::post('/deleteUser',[Controller::class,'deleteUser']);
     Route::post('/updateUserStatus',[Controller::class,'updateUserStatus']);

@@ -21,22 +21,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'name',
-        'key',
-        'package_id',
-        'contact_person',
+        'property_id',
         'email',
         'mobile',
-        'email_verified_at',
-        'website',
         'address',
         'dcrypt_password',
-        'client_limit',
-        'client_created',
-        'storage_limit',
-        'storage_used',
-        'expiry_date',
-        'logo',
+        'emi_amount',
+        'emi_count',
+        'emi_expiry_date',
         'last_login'
     ];
 
@@ -60,8 +52,8 @@ class User extends Authenticatable
     ];
 
 
-    public function package()
+    public function property()
     {
-        return $this->belongsTo(Packages::class);
+        return $this->belongsTo(Property::class);
     }
 }

@@ -7,7 +7,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Manage Clients</title>
+    <title>Manage Properties</title>
 
     <meta name="description" content="" />
 
@@ -20,6 +20,7 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.js">
     </script>
 
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     @include('include.header')
 </head>
 
@@ -41,10 +42,10 @@
                     <!-- Content -->
 
                     <div class="container-xxl flex-grow-1 container-p-y">
-                        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Packages /</span> Manage</h4>
+                        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Properties /</span> Manage</h4>
                         <div class="card">
                             <div style="display: flex;">
-                                <h5 class="card-header">Manage Packages</h5>
+                                <h5 class="card-header">Manage Properties</h5>
                                 <h5 class="card-header">
                                     <a type="button" class="btn btn-outline-secondary btn-small text-red"
                                         onclick="showAddUser()" title="Edit Client Details">Add
@@ -56,35 +57,32 @@
                                     <thead>
                                         <tr>
                                             <th>Sr No.</th>
-                                            <th>Package Name</th>
-                                            <th>Duration</th>
-                                            <th>Duration Type</th>
-                                            <th>Clients Limit</th>
-                                            <th>Storage Limit</th>
-                                            <th>Amount</th>
+                                            <th>Properties Name</th>
+                                            <th>Address</th>
+                                            <th>Description</th>
                                             <th>Created at</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody class="table-border-bottom-0">
                                         @php($i = 1)
-                                        @foreach ($packages as $singledata)
+                                        @foreach ($property as $singledata)
                                         <tr>
                                             <td>{{ $i++; }}</td>
                                             <td><i class="fab fa-angular fa-lg text-danger me-3"></i>
-                                                {{ $singledata->package_name}} </td>
-                                            <td>{{ $singledata->duration}}</td>
-                                            <td>{{ $singledata->duration_type}}</td>
-                                            <td>{{ $singledata->client_limit }}</td>
-                                            <td>{{ $singledata->storage_limit }}</td>
-                                            <td>{{ $singledata->amount }}</td>
+                                                {{ $singledata->property_name}} </td>
+                                            <td>{{ $singledata->address}}</td>
+                                            <td>{!! mb_strimwidth($singledata->description,0,100, '...') !!}</td>
                                             <td>{{ date('D, M Y',strtotime($singledata->created_at)) }}</td>
                                             <td>
-                                                <a type="button" onclick="editPackage({{$singledata}})"
+                                                <a type="button" onclick="addProperty({{$singledata}})"
+                                                    title="Edit Client Details"><i
+                                                        class="menu-icon tf-icons bx bx-image"></i></a>
+                                                <a type="button" onclick="editProperty({{$singledata}})"
                                                     title="Edit Client Details"><i
                                                         class="menu-icon tf-icons bx bx-edit"></i></a>
                                                 <a type="button"
-                                                    onclick="deletePackage('{{$singledata->id}}', '{{$singledata->client_id}}')"
+                                                    onclick="deleteProperty('{{$singledata->id}}', '{{$singledata->client_id}}')"
                                                     title="Delete Client Data"><i
                                                         class="menu-icon tf-icons bx bx-trash"></i></a>
                                             </td>
@@ -112,11 +110,11 @@
     <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form id="packageForm">
+                <form id="propertyForm">
                     @csrf
                     <input type="hidden" name="id" id="id">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel1">Package Details</h5>
+                        <h5 class="modal-title" id="exampleModalLabel1">Property Details</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -124,45 +122,25 @@
                         {{-- contact details --}}
                         <div class="row">
                             <div class="mb-3 col-md-6">
-                                <label for="firstName" class="form-label">Package name</label>
-                                <input class="form-control" type="text" id="package_name" name="package_name"
-                                    placeholder="Enter Package name" autofocus />
+                                <label for="firstName" class="form-label">Property name</label>
+                                <input class="form-control" type="text" id="property_name" name="property_name"
+                                    placeholder="Enter Property name" autofocus />
                             </div>
                             <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">Duration Number</label>
-                                <input class="form-control" type="text" id="duration" name="duration"
-                                    placeholder="Enter Duration Number" />
+                                <label for="email" class="form-label">Address</label>
+                                <input class="form-control" type="text" id="address" name="address"
+                                    placeholder="Enter Address" />
                             </div>
-
-                            <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">Duration Type</label>
-                                <select name="duration_type" required class="form-control">
-                                    <option value="-1" selected>Select Duration Type</option>
-                                    <option value="0">Days</option>
-                                    <option value="1">Month</option>
-                                    <option value="2">Year</option>
-                                </select>
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">Client Limit</label>
-                                <input class="form-control" type="number" id="client_limit" name="client_limit"
-                                    placeholder="Enter Client Limit" />
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">Storage in MB</label>
-                                <input type="text" class="form-control" type="text" id="storage_limit"
-                                    name="storage_limit" placeholder="Enter Storage Limit">
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">Package Amount</label>
-                                <input type="text" class="form-control" type="text" id="amount" name="amount"
-                                    placeholder="Enter Package Amount">
+                            <div class="mb-3 col-md-12">
+                                <label for="email" class="form-label">Description</label>
+                                <textarea class="form-control" type="text" id="description" name="description"
+                                    placeholder="Enter Description"></textarea>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary" id="process" name="process" value="update">Save
-                            Package</button>
+                            property</button>
                         <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">
                             Close
                         </button>
@@ -206,9 +184,17 @@
 
 
     <script>
+    var description;
+    ClassicEditor.create(document.querySelector('#description'))
+        .then(editor => {
+            description = editor
+        }).catch(error => {
+            console.error(error);
+        });
+
     function closeModal() {
         $('.newRow').remove(); //remove all add on documents
-        $('#editPackageloyee')[0].reset(); // remove all data in inputs
+        $('#propertyForm')[0].reset(); // remove all data in inputs
         $('#basicModal').modal('hide'); //hide the modal 
     }
 
@@ -239,16 +225,13 @@
     });
 
 
-    function editPackage(data) {
+    function editProperty(data) {
 
         console.log(data.valid_till);
         $('#id').val(data.id)
-        $('#package_name').val(data.package_name)
-        $('#duration').val(data.duration)
-        $('#duration_type').val(data.duration_type)
-        $('#client_limit').val(data.client_limit)
-        $('#storage_limit').val(data.storage_limit)
-        $('#amount').val(data.amount)
+        $('#property_name').val(data.property_name)
+        $('#address').val(data.address)
+        description.setData(data.description);
         $('#process').val('update')
         $('#basicModal').modal('show');
     }
@@ -259,11 +242,11 @@
     }
 
 
-    $('#packageForm').submit(function(e) {
+    $('#propertyForm').submit(function(e) {
         e.preventDefault();
         var formdata = new FormData(this);
         formdata.append('process', $('#process').val());
-        axios.post(`${url}/admin/addPackage`, formdata).then(function(response) {
+        axios.post(`${url}/admin/addProperty`, formdata).then(function(response) {
             // handle success
             show_Toaster(response.data.message, response.data.type)
             if (response.data.type === 'success') {
@@ -276,9 +259,9 @@
         })
     });
 
-    function deletePackage(id, client_id) {
+    function deleteProperty(id, client_id) {
         if (confirm('Are you sure?')) {
-            axios.post(`${url}/admin/deletePackage`, {
+            axios.post(`${url}/admin/deleteProperty`, {
                 id,
                 client_id
             }).then(function(response) {

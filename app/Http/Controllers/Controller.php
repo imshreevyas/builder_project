@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Documents;
 use App\Models\User;
 use App\Models\Packages;
+use App\Models\Property;
 use App\Models\Transactions;
 use App\Models\Support;
 use App\Models\Payment;
@@ -160,8 +161,8 @@ class Controller extends BaseController
 
     public function allUsers(Request $request){
         $this->checkUserType($request);
-        $data['users'] = User::select('*')->with('package')->get()->toArray();
-        $data['packages'] = Packages::where('status',1)->get()->toArray();
+        $data['users'] = User::select('*')->with('property')->get()->toArray();
+        $data['property'] = Property::where('status',1)->get()->toArray();
         return view('admin.manageUser',$data);
     }
 
@@ -186,35 +187,47 @@ class Controller extends BaseController
 
     public function addUser(Request $request){
       
-        $data = $request->validate([
-          'name' => 'required',
-          'contact_person' => 'required',
-          'email' => 'required|email|unique:users,email',
-          'mobile' => 'required|numeric|unique:users,mobile',
-          'package_id' => 'required',
-          'address' => 'required',
-          'dcrypt_password' => 'required'
-        ],[
-          'email.unique' => 'Email ID Already exists',
-          'mobile.unique' => 'Mobile Number Already exists',
-        ]);
-        
-        $data['password'] = bcrypt($data['dcrypt_password']);
         $process = $request->input('process');
+        if($process == 'add'){
+          $data = $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email',
+            'mobile' => 'required|numeric|unique:users,mobile',
+            'dcrypt_password' => 'required',
+            'property_id' => 'required',
+            'emi_amount' => 'required',
+            'emi_count' => 'required',
+            'emi_expiry_date' => 'required',
+          ],[
+            'email.unique' => 'Email ID Already exists',
+            'mobile.unique' => 'Mobile Number Already exists',
+          ]);
+        }else if($process == 'update'){
+          $data = $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email,'.$request['id'],
+            'mobile' => 'required|numeric|unique:users,mobile,'.$request['id'],
+            'dcrypt_password' => 'required',
+            'property_id' => 'required',
+            'emi_amount' => 'required',
+            'emi_count' => 'required',
+            'emi_expiry_date' => 'required',
+          ],[
+            'email.unique' => 'Email ID Already exists',
+            'mobile.unique' => 'Mobile Number Already exists',
+          ]);
+        }
 
-        if($process == 'add')
-          $data['key'] = Str::random(15);
-        else
-          $data['key'] = $request->input('key');
+
+        $data['password'] = bcrypt($data['dcrypt_password']);
 
         if($process == 'add'){
           $user = new User($data);
         }else if($process == 'update'){
-          $user = User::where(['key' => $data['key']])->update($data);
+          $user = User::where(['id' => $request['id']])->update($data);
         }
 
         if($process == 'add' ? $user->save() : $user){
-          $this->addUpdateUserPackage($data['key'],$data['package_id']);
           return response()->json(['message'=>'User '.($process == 'add' ? 'Added' : 'Updated'),'type'=>'success']);
         }
         else
@@ -306,26 +319,30 @@ class Controller extends BaseController
       return view('admin.managePackages',$data);
     }
 
-    public function addPackage(Request $request){
+    public function allProperties(Request $request){
+      $this->checkUserType($request);
+      $data['property'] = Property::all();
+      return view('admin.manageProperties',$data);
+    }
+
+    public function addProperty(Request $request){
 
       if($request->session()->has('user_type') && $request->session()->get('user_type') != 'admin')
         return response()->json(['message' => 'Invalid Request','type'=>'failed'], 401);
 
       $packageData = $request->validate([
-        'package_name' => 'required|string',
-        'duration' => 'required|int',
-        'duration_type' => 'required|int',
-        'client_limit' => 'required|int',
-        'storage_limit' => 'required|int',
-        'amount' => 'required|int',
+        'property_name' => 'required|string',
+        'address' => 'required|string',
+        'description' => 'required|string',
       ]);
 
+      $packageData['description'] = addslashes($packageData['description']);
       $process = $request->input('process');
 
       if($process == 'add'){
-        $package = new Packages($packageData);
+        $package = new Property($packageData);
       }else if($process == 'update'){
-        $package = Packages::where(['id' => $request->id])->update($packageData);
+        $package = Property::where(['id' => $request->id])->update($packageData);
       }
 
       if($process == 'add' ? $package->save() : $package)
@@ -334,7 +351,7 @@ class Controller extends BaseController
         return response()->json(['message' => 'Opps! operation failed','type'=>'failed'], 401);
     }
 
-    public function deletePackage(Request $request){
+    public function deleteProperty(Request $request){
       if($request->session()->has('user_type') && $request->session()->get('user_type') != 'admin')
         return response()->json(['message' => 'Invalid Request','type'=>'failed'], 401);
 
@@ -343,7 +360,7 @@ class Controller extends BaseController
         'id' => 'required'
       ]);
       
-      $delete = Packages::where(['id' => $data['id']])->delete();
+      $delete = Property::where(['id' => $data['id']])->delete();
       if($delete){
         return response()->json([
           'message'=>'Package Deleted',
@@ -363,10 +380,10 @@ class Controller extends BaseController
 
         
       $data = $request->validate([
-        'key' => 'required'
+        'id' => 'required'
       ]);
       
-      $delete = User::where(['key' => $data['key']])->delete();
+      $delete = User::where(['id' => $data['id']])->delete();
       if($delete){
         return response()->json([
           'message'=>'User Deleted',
@@ -386,11 +403,11 @@ class Controller extends BaseController
 
         
       $data = $request->validate([
-        'key' => 'required',
+        'id' => 'required',
         'value' => 'required'
       ]);
       
-      $update = User::where(['key' => $data['key']])->update(['status' => $data['value']]);
+      $update = User::where(['id' => $data['id']])->update(['status' => $data['value']]);
       if($update){
         return response()->json([
           'message'=>'User Updated',

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('property_name');
             $table->text('address');
             $table->text('description');
-            $table->integer('status');
+            $table->integer('status')->default(1);
             $table->timestamps();
         });
     }
