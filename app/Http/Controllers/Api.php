@@ -1,10 +1,14 @@
 <?php
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
-class ApiController extends Controller
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class Api extends Controller
 {
+    //
+
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
@@ -14,10 +18,10 @@ class ApiController extends Controller
             $token = $user->createToken('auth')->plainTextToken;
 
             return response()->json([
-                'message' => 'Logged in successfully',
+                'message' => 'success',
                 'user' => $user,
                 'token' => $token,
-            ]);
+            ],200);
         }
 
         return response()->json(['message' => 'Invalid credentials'], 401);

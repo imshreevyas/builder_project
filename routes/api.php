@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api;
+use App\Http\Controllers\Controller;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 });
-Route::post('/login', [Api::class, 'login']);
+Route::post('/login', [Api::class, 'login'])->name('login');
 Route::get('/test', function () {
     return response()->json([
         'message' => 'Hello World!',
