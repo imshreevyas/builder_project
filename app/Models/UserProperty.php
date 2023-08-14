@@ -4,11 +4,11 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class UserProperty extends Model
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -17,15 +17,13 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+    protected $table = 'user_properties';
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'email',
-        'mobile',
-        'address',
-        'dcrypt_password',
-        'last_login'
+        'user_id',
+        'property_id',
+        'emi_amount',
+        'emi_count',
+        'status',
     ];
 
     /**
@@ -33,23 +31,10 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
     /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
 
-
-    public function property()
-    {
-        return $this->belongsTo(Property::class);
-    }
 }
