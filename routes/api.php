@@ -15,16 +15,21 @@ use App\Http\Controllers\Controller;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    })->name('user');
-    Route::get('/properties', [Api::class, 'properties'])->name('properties');
-});
 Route::post('/login', [Api::class, 'login'])->name('login');
 Route::get('/test', function () {
     return response()->json([
         'message' => 'Hello World!',
     ], 200);
 });
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    })->name('user');
+    Route::get('/properties', [Api::class, 'properties'])->name('properties');
+    Route::get('/userProperties', [Api::class, 'userProperties'])->name('userProperties');
+    Route::post('/transactionList', [Api::class, 'transactionList'])->name('transactionList');
+    Route::post('/transactionDetail', [Api::class, 'transactionDetail'])->name('transactionDetail');
+    Route::post('/profileUpdate', [Api::class, 'profileUpdate'])->name('resetPassword');
+    Route::post('/resetPassword', [Api::class, 'resetPassword'])->name('resetPassword');
+});
+

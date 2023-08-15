@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('property_id');
             $table->integer('emi_amount')->default(0);
             $table->integer('emi_count')->default(0);
-            $table->integer('status')->default(1);
+            $table->integer('status')->default(1)->comment('1:ongoing,0:closed');
             $table->timestamps();
         });
     }
