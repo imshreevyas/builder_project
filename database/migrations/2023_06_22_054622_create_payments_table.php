@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('user_id');
             $table->integer('property_id');
-            $table->integer('emi_count')->comment('emi number,e.g 2nd emi, 3rd emi');
+            $table->integer('emi_count')->comment('emi number,e.g 2, 3rd emi');
             $table->integer('emi_amount');
             $table->integer('due_date');
             $table->string('transaction_id')->nullable();
