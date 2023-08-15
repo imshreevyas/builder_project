@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('due_date');
             $table->string('transaction_id')->nullable();
             $table->string('remark')->nullable();
-            $table->integer('status');
+            $table->integer('status')->default(0)->comment('0:pending,1:paid');
             $table->integer('updated_by');
             $table->timestamps();
         });
