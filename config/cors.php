@@ -17,7 +17,7 @@ return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['*','http://localhost:19000','http://10.0.2.2:8081','http://10.0.2.16:8081'],
+    'allowed_origins' => ['https://aimgroupindia.in','http://aimgroupindia.in','216.10.241.4'],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
