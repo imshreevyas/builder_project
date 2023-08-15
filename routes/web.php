@@ -83,7 +83,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/login',[Controller::class,'adminLogin'])->name('adminLogin');
     Route::get('/dashboard',[Controller::class,'adminDashboard'])->name('adminDashboard');
     Route::get('/allUsers',[Controller::class,'allUsers'])->name('allUsers');
-    Route::get('/allPackages',[Controller::class,'allPackages'])->name('allPackages');
+    Route::get('/allProperties',[Controller::class,'allProperties'])->name('allProperties');
     Route::get('/allSupport',[Controller::class,'allSupport'])->name('allSupport');
     Route::get('/myAccount',[Controller::class,'myAccount'])->name('myAccount');
     Route::get('/settings',function(){
@@ -91,11 +91,12 @@ Route::prefix('admin')->group(function () {
     })->name('settings');
     
     
-    // Post Routes sad
+    // Post Routes
     Route::post('/adminLoginPost',[Controller::class,'adminLoginPost']);
-    Route::post('/addPackage',[Controller::class,'addPackage']);
+    Route::post('/addProperty',[Controller::class,'addProperty']);
     Route::post('/addUserPackage',[Controller::class,'addUserPackage']);
     Route::post('/addUser',[Controller::class,'addUser']);
+    Route::post('/deleteProperty',[Controller::class,'deleteProperty']);
     Route::post('/deletePackage',[Controller::class,'deletePackage']);
     Route::post('/deleteUser',[Controller::class,'deleteUser']);
     Route::post('/updateUserStatus',[Controller::class,'updateUserStatus']);
@@ -107,14 +108,3 @@ Route::prefix('admin')->group(function () {
     Route::post('/settings',[Controller::class,'settings'])->name('settings');
     Route::get('/adminLogout',[Controller::class,'adminLogout'])->name('adminLogout');
 });
-
-
-
-// Frontend Routes
-
-// Route::get('/', [Controller::class, 'home']);
-// Route::get('/azerbaijan', [Controller::class, 'azerbaijan']);
-// Route::get('/georgia', [Controller::class, 'georgia']);
-// Route::get('/about-us', [Controller::class, 'aboutus']);
-// Route::get('/contact', [Controller::class, 'contact']);
-// Route::post('/sendDetails', [Controller::class, 'contact']);

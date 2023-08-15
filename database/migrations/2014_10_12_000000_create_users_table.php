@@ -18,14 +18,11 @@ return new class extends Migration
             $table->string('name',100);
             $table->string('email',100)->unique();
             $table->string('mobile',12)->unique();
-            $table->string('address',100);
-            $table->integer('property_id')->default(0);
-            $table->integer('emi_amount')->default(0);
-            $table->integer('emi_count')->default(0);
+            $table->string('address',100)->nullable();
             $table->string('dcrypt_password');
             $table->string('password');
-            $table->datetime('emi_expiry_date')->nullable();
             $table->string('last_login')->nullable();
+            $table->integer('status')->default(1);
             $table->rememberToken();
             $table->timestamps();
         });

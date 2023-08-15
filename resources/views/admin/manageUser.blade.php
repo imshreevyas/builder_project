@@ -124,8 +124,10 @@
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Mobile</th>
-                                            <th>Package</th>
-                                            <th>Expiry Date</th>
+                                            <th>Property Name</th>
+                                            <th>EMI Amount</th>
+                                            <th>EMI Count</th>
+                                            <th>EMI Expiry Date</th>
                                             <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
@@ -138,26 +140,28 @@
                                             <td>{{ $singledata['name'] }} </td>
                                             <td>{{ $singledata['email'] }}</td>
                                             <td>{{ $singledata['mobile'] }}</td>
-                                            <td>{{ $singledata['package']['package_name'] }}</td>
-                                            <td>{{ date('d M, Y', strtotime($singledata['expiry_date'])) }}</td>
+                                            <td>{{ $singledata['property']['property_name'] }}</td>
+                                            <td>{{ $singledata['emi_amount'] }}</td>
+                                            <td>{{ $singledata['emi_count'] }}</td>
+                                            <td>{{ date('d M, Y', strtotime($singledata['emi_expiry_date'])) }}</td>
                                             <td>
                                                 <label class="switch">
-                                                    <input type="checkbox" id="status-{{ $singledata['key'] }}"
+                                                    <input type="checkbox" id="status-{{ $singledata['id'] }}"
                                                         onclick="updateUserStatus(this)"
-                                                        data-key="{{ $singledata['key'] }}"
+                                                        data-key="{{ $singledata['id'] }}"
                                                         data-value="{{ $singledata['status'] == 1 ? '0' : '1' }}"
                                                         {{ $singledata['status'] == 1 ? 'checked' : '' }}>
                                                     <span class="slider"></span>
                                                 </label>
                                             </td>
                                             <td>
-                                                <a type="button" onclick="showAddPayment('{{$singledata['key']}}')"
+                                                <a type="button" onclick="showAddPayment('{{$singledata['id']}}')"
                                                     title="Add New Package"><i
                                                         class="menu-icon tf-icons bx bx-file"></i></a>
                                                 <a type="button" onclick="editUser({{ json_encode($singledata) }})"
                                                     title="Edit Client Details"><i
                                                         class="menu-icon tf-icons bx bx-edit"></i></a>
-                                                <a type="button" onclick="deleteUser('{{$singledata['key']}}')"
+                                                <a type="button" onclick="deleteUser('{{$singledata['id']}}')"
                                                     title="Delete Client Data"><i
                                                         class="menu-icon tf-icons bx bx-trash"></i></a>
                                             </td>
@@ -198,14 +202,9 @@
                         {{-- contact details --}}
                         <div class="row">
                             <div class="mb-3 col-md-6">
-                                <label for="firstName" class="form-label">Company name</label>
+                                <label for="firstName" class="form-label">User name</label>
                                 <input class="form-control" type="text" id="name" name="name"
-                                    placeholder="Enter Company name" autofocus />
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">Contact Person Name</label>
-                                <input class="form-control" type="text" id="contact_person" name="contact_person"
-                                    placeholder="Enter Contact Person Name" />
+                                    placeholder="Enter User name" autofocus />
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label for="email" class="form-label">Email</label>
@@ -218,22 +217,32 @@
                                     placeholder="Enter Mobile Number" />
                             </div>
                             <div class="mb-3 col-md-6">
+                                <label for="email" class="form-label">Emi Amount</label>
+                                <input class="form-control" type="text" id="emi_amount" name="emi_amount"
+                                    placeholder="Enter Emi Amount" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="email" class="form-label">No of EMI</label>
+                                <input class="form-control" type="text" id="emi_count" name="emi_count"
+                                    placeholder="Enter Number of EMI" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="email" class="form-label">EMI expiry Date</label>
+                                <input class="form-control" type="date" id="emi_expiry_date" name="emi_expiry_date" />
+                            </div>
+                            <div class="mb-3 col-md-6">
                                 <label for="email" class="form-label">Password</label>
                                 <input class="form-control" type="text" id="dcrypt_password" name="dcrypt_password"
                                     placeholder="Enter Password" />
                             </div>
-                            <div class="mb-3 col-md-12">
-                                <label for="email" class="form-label">Address</label>
-                                <textarea class="form-control" type="text" id="address" name="address"
-                                    placeholder="Enter Address"></textarea>
-                            </div>
                             <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">Select Package</label>
-                                <select name="package_id" id="package_id" class="form-control">
-                                    <option value="0">Select Package</option>
-                                    @if(count($packages) > 0)
-                                    @foreach($packages as $singlePackage)
-                                    <option value="{{ $singlePackage['id'] }}">{{ $singlePackage['package_name'] }}
+                                <label for="email" class="form-label">Select Property Name</label>
+                                <select name="property_id" id="property_id" class="form-control">
+                                    <option value="0">Select Property Name</option>
+                                    <option value="1">Ostwal Phase 1</option>
+                                    @if(count($property) > 0)
+                                    @foreach($property as $singleProperty)
+                                    <option value="{{ $singleProperty['id'] }}">{{ $singleProperty['property_name'] }}
                                     </option>
                                     @endforeach
                                     @endif
@@ -271,9 +280,9 @@
                                 <label for="email" class="form-label">Select Package</label>
                                 <select name="package_id" id="package_id" class="form-control">
                                     <option value="0">Select Package</option>
-                                    @if(count($packages) > 0)
-                                    @foreach($packages as $singlePackage)
-                                    <option value="{{ $singlePackage['id'] }}">{{ $singlePackage['package_name'] }}
+                                    @if(count($property) > 0)
+                                    @foreach($property as $singleProperty)
+                                    <option value="{{ $singleProperty['id'] }}">{{ $singleProperty['property_name'] }}
                                     </option>
                                     @endforeach
                                     @endif
@@ -314,9 +323,9 @@
                                 <label for="email" class="form-label">Select Package</label>
                                 <select name="package_id" id="package_id" class="form-control">
                                     <option value="0">Select Package</option>
-                                    @if(count($packages) > 0)
-                                    @foreach($packages as $singlePackage)
-                                    <option value="{{ $singlePackage['id'] }}">{{ $singlePackage['package_name'] }}
+                                    @if(count($property) > 0)
+                                    @foreach($property as $singleProperty)
+                                    <option value="{{ $singleProperty['id'] }}">{{ $singleProperty['property_name'] }}
                                     </option>
                                     @endforeach
                                     @endif
@@ -414,14 +423,14 @@
 
     function editUser(data) {
         $('#id').val(data.id)
-        $('#key').val(data.key)
         $('#name').val(data.name)
-        $('#contact_person').val(data.contact_person)
         $('#email').val(data.email)
         $('#mobile').val(data.mobile)
-        $('#address').val(data.address)
+        $('#emi_amount').val(data.emi_amount)
+        $('#emi_count').val(data.emi_count)
+        $('#emi_expiry_date').val(data.emi_expiry_date)
         $('#dcrypt_password').val(data.dcrypt_password)
-        $("#package_id").val(data.package_id);
+        $("#property_id").val(data.property_id);
         $('#process').val('update')
         $('#basicModal').modal('show');
     }
@@ -498,10 +507,10 @@
         })
     });
 
-    function deleteUser(key) {
+    function deleteUser(id) {
         if (confirm('Are you sure?')) {
             axios.post(`${url}/admin/deleteUser`, {
-                key,
+                id,
             }).then(function(response) {
                 // handle success
                 show_Toaster(response.data.message, response.data.type)
@@ -518,12 +527,11 @@
 
     function updateUserStatus(e) {
         value = $(e).attr('data-value');
-        id = $(e).attr('id');
         if (confirm('Are you sure, you want to ' + (value == 1 ? 'Activate' : 'Deactivate'))) {
-            key = $(e).attr('data-key');
+            id = $(e).attr('data-key');
 
             axios.post(`${url}/admin/updateUserStatus`, {
-                key,
+                id,
                 value,
             }).then(function(response) {
                 // handle success
@@ -577,40 +585,6 @@
 
     function deleteRow(className) {
         $(`.${className}`).remove();
-    }
-
-
-    function getDocument(client_id) {
-
-        $('.docCol').remove();
-        axios.get(`${url}/getDocument/${client_id}`).then(function(response) {
-            // handle success
-            show_Toaster(response.data.message, response.data.type)
-            if (response.data.type === 'success') {
-                var html = response.data.html;
-                $('#docdiv').append(html);
-                $('#docModal').modal('show');
-            }
-        }).catch(function(err) {
-            show_Toaster(err.response.data.message, 'error')
-        })
-    }
-
-    function deleteDoc(e) {
-
-        var client_id = $(e).attr('data-client-id');
-        var id = $(e).attr('data-id');
-        axios.get(`${url}/deleteDocument/${client_id}/${id}`).then(function(response) {
-            // handle success
-            show_Toaster(response.data.message, response.data.type)
-            if (response.data.type === 'success') {
-                setTimeout(() => {
-                    window.location.href = `${url}/admin/allUsers`;
-                }, 1000);
-            }
-        }).catch(function(err) {
-            show_Toaster(err.response.data.message, 'error')
-        })
     }
     </script>
 </body>

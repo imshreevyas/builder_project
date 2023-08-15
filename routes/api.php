@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api;
+use App\Http\Controllers\Controller;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +16,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    })->name('user');
+    Route::get('/properties', [Api::class, 'properties'])->name('properties');
+});
+Route::post('/login', [Api::class, 'login'])->name('login');
+Route::get('/test', function () {
+    return response()->json([
+        'message' => 'Hello World!',
+    ], 200);
 });

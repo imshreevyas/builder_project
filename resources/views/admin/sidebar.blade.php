@@ -41,15 +41,15 @@
             </ul>
         </li>
 
-        <li class="menu-item {{ request()->segment(1) == 'allPackages' ?'open':'' }}">
+        <li class="menu-item {{ request()->segment(1) == 'allProperties' ?'open':'' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bxs-gift"></i>
-                <div data-i18n="Layouts">Packages</div>
+                <i class="menu-icon tf-icons bx bxs-building"></i>
+                <div data-i18n="Layouts">Properties</div>
             </a>
 
             <ul class="menu-sub">
-                <li class="menu-item {{ request()->segment(1)=='allPackages'?'active':''}}">
-                    <a href="{{url('/admin/allPackages')}}" class="menu-link">
+                <li class="menu-item {{ request()->segment(1)=='allProperties'?'active':''}}">
+                    <a href="{{url('/admin/allProperties')}}" class="menu-link">
                         <div data-i18n="Without navbar">Manage</div>
                     </a>
                 </li>
@@ -59,7 +59,7 @@
         <li class="menu-item">
             <a href="{{url('/admin/allSupport')}}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-phone"></i>
-                <div data-i18n="Analytics">Support</div>
+                <div data-i18n="Analytics">Contact</div>
             </a>
         </li>
 
