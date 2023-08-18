@@ -75,7 +75,7 @@
                                             <td>{!! mb_strimwidth($singledata->description,0,100, '...') !!}</td>
                                             <td>{{ date('D, M Y',strtotime($singledata->created_at)) }}</td>
                                             <td>
-                                                <a type="button" onclick="addProperty({{$singledata}})"
+                                                <a type="button" onclick="getDocument('{{$singledata->id}}')"
                                                     title="Edit Client Details"><i
                                                         class="menu-icon tf-icons bx bx-image"></i></a>
                                                 <a type="button" onclick="editProperty({{$singledata}})"
@@ -108,7 +108,7 @@
     <!-- / Layout wrapper -->
 
     <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <form id="propertyForm">
                     @csrf
@@ -137,13 +137,38 @@
                                     placeholder="Enter Description"></textarea>
                             </div>
                         </div>
+                        <div class="row docrow"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary" id="process" name="process" value="update">Save
                             property</button>
-                        <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">
-                            Close
+                        <button type="button" class="btn btn-outline-secondary" value="0"
+                            onclick="createDocumentDiv(this)">
+                            Add Documents/Images
                         </button>
+                    </div>
+            </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Document Delete Modal -->
+    <div class="modal fade" id="docModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form id="editEmployee">
+                    @csrf
+                    <input type="hidden" name="emp_id" id="emp_id">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel1">Edit</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="docDiv row container" id="docdiv"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">
+                            Close</button>
                     </div>
             </div>
             </form>
@@ -273,9 +298,58 @@
                     }, 500);
                 }
             }).catch(function(err) {
+                console.log(err);
                 show_Toaster(err.response.data.message, 'error')
             })
         }
+    }
+
+
+    function getDocument(property_id) {
+        $('.docCol').remove();
+        axios.get(`${url}/admin/getDocument/${property_id}`).then(function(response) {
+            // handle success
+            show_Toaster(response.data.message, response.data.type)
+            if (response.data.type === 'success') {
+                var html = response.data.html;
+                $('#docdiv').append(html);
+                $('#docModal').modal('show');
+            }
+        }).catch(function(err) {
+            show_Toaster(err.response.data.message, 'error')
+        })
+    }
+
+    function createDocumentDiv(e) {
+        var lastkey = $(e).val();
+
+        var html = `
+        
+        <div class="row newRow docrow-${lastkey}">
+        <hr>
+            <div class="mb-3 col-md-5">
+                <label for="email" class="form-label">Document Name</label>
+                <input class="form-control" type="text" id="documents[${lastkey}][name]"
+                    name="documents[${lastkey}][name]" placeholder="Enter Document Name" />
+            </div>
+            <div class="mb-3 col-md-5">
+                <label for="firstName" class="form-label">Select Documents</label>
+                <input class="form-control" type="file" id="documents[${lastkey}][file]"
+                    name="documents[${lastkey}][file]" />
+            </div>
+            <div class="mb-3 col-md-1">
+                <button type="button" class="btn btn-danger" onclick="deleteRow('docrow-${lastkey}')"><i class="menu-icon tf-icons bx bxs-trash"></i></button>
+            </div>
+
+        </div>
+        `;
+        lastkey++;
+        $(e).val(lastkey)
+        $('.docrow').append(html);
+    }
+
+    function deleteRow(className) {
+        $(`.${className}`).remove();
     }
     </script>
 </body>

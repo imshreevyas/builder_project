@@ -89,7 +89,13 @@ Route::prefix('admin')->group(function () {
     Route::get('/settings',function(){
         return view('admin.settings');
     })->name('settings');
-    
+    Route::get('/getPropertyOptions',[Controller::class,'getPropertyOptions'])->name('getPropertyOptions');
+    Route::post('/getUserProperties',[Controller::class,'getUserProperties'])->name('getUserProperties');
+    Route::post('/closeUserProperty',[Controller::class,'closeUserProperty'])->name('closeUserProperty');
+    Route::post('/addUserProperty',[Controller::class,'addUserProperty'])->name('addUserProperty');
+    Route::get('/userPropertyPayment/{user_id}/{transaction_id}',[Controller::class,'userPropertyPayment'])->name('userPropertyPayment');
+    Route::post('/updateUserPaymentDetails',[Controller::class,'updateUserPaymentDetails'])->name('updateUserPaymentDetails');
+    Route::get('/getDocument/{property_id}',[Controller::class,'getDocument']);
     
     // Post Routes
     Route::post('/adminLoginPost',[Controller::class,'adminLoginPost']);

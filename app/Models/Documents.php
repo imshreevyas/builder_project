@@ -10,8 +10,13 @@ class Documents extends Model
     use HasFactory;
     protected $table = 'documents';
     protected $fillable = [
-        'user_id',
+        'property_id',
         'document_name',
         'document_url'
     ];
+
+    public function property()
+    {
+        return $this->belongsTo(Property::class);
+    }
 }

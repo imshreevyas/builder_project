@@ -19,7 +19,8 @@ return new class extends Migration
             $table->integer('property_id');
             $table->integer('emi_count')->comment('emi number,e.g 2, 3rd emi');
             $table->integer('emi_amount');
-            $table->integer('due_date');
+            $table->datetime('due_date');
+            $table->string('map_id')->nullable();
             $table->string('transaction_id')->nullable();
             $table->string('remark')->nullable();
             $table->integer('status')->default(0)->comment('0:pending,1:paid');

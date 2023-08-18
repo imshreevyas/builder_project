@@ -8,6 +8,7 @@ use App\Models\Documents;
 use App\Models\User;
 use App\Models\Packages;
 use App\Models\Property;
+use App\Models\UserProperty;
 use App\Models\Transactions;
 use App\Models\Support;
 use App\Models\Payment;
@@ -194,47 +195,90 @@ class Controller extends BaseController
             'email' => 'required|email|unique:users,email',
             'mobile' => 'required|numeric|unique:users,mobile',
             'dcrypt_password' => 'required',
-            'property_id' => 'required',
-            'emi_amount' => 'required',
-            'emi_count' => 'required',
-            'emi_expiry_date' => 'required',
           ],[
             'email.unique' => 'Email ID Already exists',
             'mobile.unique' => 'Mobile Number Already exists',
           ]);
+          
+          if(isset($request['property']) && !empty($request['property'])){
+
+            $propertyData = $request->validate([
+              'property.*.property_id' => 'required',
+              'property.*.emi_amount' => 'required|numeric',
+              'property.*.first_emi_date' => 'required|date',
+              'property.*.emi_count' => 'required|numeric',
+            ],[
+              'property.*.property_id.required' => 'Property Name is required!',
+              'property.*.emi_amount.required' => 'Emi Amount is Required',
+              'property.*.first_emi_date.required' => '1st Emi Date is Required',
+              'property.*.emi_amount.numeric' => 'Emi Amount Should be Numeric',
+              'property.*.emi_count.required' => 'Emi Count is Required',
+              'property.*.emi_count.numeric' => 'Emi Count Should be Numeric',
+            ]);
+          }
         }else if($process == 'update'){
           $data = $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email,'.$request['id'],
             'mobile' => 'required|numeric|unique:users,mobile,'.$request['id'],
             'dcrypt_password' => 'required',
-            'property_id' => 'required',
-            'emi_amount' => 'required',
-            'emi_count' => 'required',
-            'emi_expiry_date' => 'required',
           ],[
             'email.unique' => 'Email ID Already exists',
             'mobile.unique' => 'Mobile Number Already exists',
           ]);
         }
 
-
         $data['password'] = bcrypt($data['dcrypt_password']);
 
         if($process == 'add'){
+          
           $user = new User($data);
+          if($user->save()){
+            if(isset($propertyData['property']) && count($propertyData['property']) > 0){
+              foreach($propertyData['property'] as $key => $singleProperty){
+                $singleProperty['user_id'] = $user->id;
+                $singleProperty['status'] = 1;
+                $singleProperty['map_id'] = uniqid();
+                $userProperty = new UserProperty($singleProperty);
+                $userProperty->save();
+                $this->addEmiPayments($singleProperty['map_id'],$user->id,$singleProperty['property_id'],$singleProperty['emi_count'],$singleProperty['emi_amount'],$singleProperty['first_emi_date']);
+              }
+            }
+            return response()->json(['message'=>'User Added','type'=>'success']);
+          }else{
+            return response()->json(['message' => 'Opps! operation failed','type'=>'failed'], 401);
+          }
+
         }else if($process == 'update'){
           $user = User::where(['id' => $request['id']])->update($data);
-        }
-
-        if($process == 'add' ? $user->save() : $user){
-          return response()->json(['message'=>'User '.($process == 'add' ? 'Added' : 'Updated'),'type'=>'success']);
-        }
-        else
+          if($user)
+            return response()->json(['message'=>'User Updated','type'=>'success']);
+          else
+            return response()->json(['message' => 'Opps! operation failed','type'=>'failed'], 401);
+        }else
           return response()->json(['message' => 'Opps! operation failed','type'=>'failed'], 401);
+
+        
 
     }
 
+    public function addUserProperty(Request $request){
+      if(isset($request['property']) && count($request['property']) > 0){
+        foreach($request['property'] as $key => $singleProperty){
+          $singleProperty['user_id'] = $request['user_id'];
+          $singleProperty['status'] = 1;
+          $singleProperty['map_id'] = uniqid();
+          $userProperty = new UserProperty($singleProperty);
+          $userProperty->save();
+          $this->addEmiPayments($singleProperty['map_id'],$request['user_id'],$singleProperty['property_id'],$singleProperty['emi_count'],$singleProperty['emi_amount'],$singleProperty['first_emi_date']);
+        }
+
+        $html = $this->getPropertyTableTd($request['user_id']);
+        return response()->json(['data' => $html,'message'=>'User Properties Added','type'=>'success'], 200);
+      }
+      else
+        return response()->json(['message' => 'Opps! operation failed','type'=>'failed'], 401);
+    }
 
     public function addUserPackage(Request $request){
 
@@ -325,27 +369,162 @@ class Controller extends BaseController
       return view('admin.manageProperties',$data);
     }
 
+    public function getUserProperties(Request $request){
+      $html = $this->getPropertyTableTd($request['user_id']);
+      if($html){
+        return response()->json([
+          'data'=>$html,
+          'type'=>'success'
+        ]);  
+      }else{
+        return response()->json([
+          'data' => '',
+          'type'=>'failed'
+        ], 401);
+      }
+    }
+
+    public function closeUserProperty(Request $request){
+
+      $whereData = $request->validate([
+        'user_id' => 'required|numeric',
+        'map_id' => 'required'
+        ]
+      );
+
+      $closeEMI = userProperty::where($whereData)->update(['status' => 0]);
+
+      $html = $this->getPropertyTableTd($request['user_id']);
+      if($closeEMI){
+        return response()->json([
+          'data'=>$html,
+          'message' => 'Emi Closed Successfully!!',
+          'type'=>'success'
+        ]);  
+      }else{
+        return response()->json([
+          'data' => '',
+          'type'=>'failed'
+        ], 401);
+      }
+    }
+
+    public function getPropertyTableTd($user_id = 0){
+      $html = '';
+      if($user_id != 0){
+        $property = optional(userProperty::where('user_id',$user_id)->with('property')->orderBy('id','desc')->get())->toArray();
+        if(count($property) > 0){
+          foreach($property as $singleProperty){
+            $html .= '<tr>
+                <td><a href='.('userPropertyPayment/'.$singleProperty['user_id'].'/'.$singleProperty['map_id']).'>'.$singleProperty['property']['property_name'].'</a></td>
+                <td>'.$singleProperty['emi_amount'].'</td>
+                <td>'.$singleProperty['emi_count'].'</td>
+                <td>'.($singleProperty['status'] == 0 ? '<span class="badge bg-danger">Closed</span>' : '<span class="badge bg-success">Open</span>').'</td><td>';
+                
+            if($singleProperty['status'] == 1){
+                $html .= '<button type="button" onclick=closeEMI(this) class="btn btn-danger btn-sm" data-map_id='.$singleProperty['map_id'].' data-user_id='.$singleProperty['user_id'].'>Close EMI</button>';
+            }
+            $html .= '</td></tr>';
+          }
+        }
+      }
+
+      return $html;
+    }
+
+    public function addEmiPayments($map_id,$user_id,$property_id,$emi_count,$emi_amount,$first_emi_date){
+      for($i=0;$i<= $emi_count;$i++){
+        $emi_date = $i == 0 ? Carbon::parse($first_emi_date) : Carbon::parse($first_emi_date)->addMonth($i);
+        $data['user_id'] = $user_id;
+        $data['property_id'] = $property_id;
+        $data['emi_count'] = $i+1;
+        $data['emi_amount'] = $emi_amount;
+        $data['due_date'] = $emi_date;
+        $data['map_id'] = $map_id;
+        $data['status'] = 0;
+        $data['updated_by'] = 1;
+
+        $Payment = new Payment($data);
+        $Payment->save();
+      }
+    }
+
+    public function getPropertyOptions(){
+      $property = optional(Property::where('status',1)->get())->toArray();
+      $html = '';
+      if(count($property) > 0){
+          foreach($property as $singleProperty){
+            $html .= '<option value='.$singleProperty['id'].'>'.$singleProperty['property_name'].'</option>';
+          }
+      }
+      if($html){
+        return response()->json([
+          'data'=>$html,
+          'type'=>'success'
+        ]);  
+      }else{
+        return response()->json([
+          'data' => '',
+          'type'=>'failed'
+        ], 401);
+      }
+    }
+
     public function addProperty(Request $request){
 
       if($request->session()->has('user_type') && $request->session()->get('user_type') != 'admin')
         return response()->json(['message' => 'Invalid Request','type'=>'failed'], 401);
 
-      $packageData = $request->validate([
+      $propertyData = $request->validate([
         'property_name' => 'required|string',
         'address' => 'required|string',
         'description' => 'required|string',
       ]);
 
-      $packageData['description'] = addslashes($packageData['description']);
+      $propertyData['description'] = addslashes($propertyData['description']);
       $process = $request->input('process');
 
       if($process == 'add'){
-        $package = new Property($packageData);
+        $property = new Property($propertyData);
+        $property->save();
+        $property_id = $property->id;
+        
       }else if($process == 'update'){
-        $package = Property::where(['id' => $request->id])->update($packageData);
+        $property_id = $request->id;
+        $property = Property::where(['id' => $property_id])->update($propertyData);
       }
+      
+      // Add Documents
+      if ($request->documents){
+          foreach($request->documents as $key=>$file) {
+            $request->validate([
+                'documents.'.$key.'.name' => 'required',
+                'documents.'.$key.'.file' => 'required|mimes:doc,docx,xlsx,xls,pdf,zip,png,bmp,jpg,mp4|max:100000',
+            ],[
+              'documents.*.name.required' => 'Please Enter File name',
+              'documents.*.file.required' => 'Please select File',
+              'documents.*.file.mimes' => 'Only doc,docx,xlsx,xls,pdf,zip,png,bmp,jpg Type Accepted',
+              'documents.*.file.max' => 'File size cannot be Greater 5mb',
+            ]);
+            
+            $fileName = time().'_'.$file['name'].'_'.$file['file']->getClientOriginalName(); 
+            $filePath = 'documents/'.str_replace(' ','_',$propertyData['property_name']).'/'.$fileName;
 
-      if($process == 'add' ? $package->save() : $package)
+            Storage::putFileAs('documents/'.str_replace(' ','_',$propertyData['property_name']), $file['file'], $fileName, 'public');
+            Storage::url($fileName);
+                            
+            // Create files
+            $documentData = [
+              'property_id' => $property_id,
+              'document_name' => $file['name'],
+              'document_url' => $filePath
+            ];
+            Documents::create($documentData);
+        }
+      }
+      
+
+      if($property)
         return response()->json(['message'=>'Package '.($process == 'add' ? 'Added' : 'Updated'),'type'=>'success']);
       else
         return response()->json(['message' => 'Opps! operation failed','type'=>'failed'], 401);
@@ -361,9 +540,10 @@ class Controller extends BaseController
       ]);
       
       $delete = Property::where(['id' => $data['id']])->delete();
-      if($delete){
+      $deleteDoc = optional(Documents::where(['property_id' => $data['id']])->delete());
+      if($delete && $deleteDoc){
         return response()->json([
-          'message'=>'Package Deleted',
+          'message'=>'Property Deleted',
           'type'=>'success'
         ]);  
       }else{
@@ -445,12 +625,41 @@ class Controller extends BaseController
         return response()->json(['message' => 'Invalid Package Selected','type'=>'failed'], 401);
     }
 
-
     public function adminLogout(){
       Auth::logout();
       return redirect()->route('adminLogin');
     }
 
+    public function userPropertyPayment(Request $request,$user_id = 0,$map_id = 0){
+      $this->checkUserType($request);
+      $data['payments'] = optional(Payment::where(['user_id' => $user_id,'map_id' => $map_id])->with('property')->get())->toArray();
+      return view('admin.manageUserPayments',$data);
+    }
+
+    public function updateUserPaymentDetails(Request $request){
+      $data = $request->validate([
+        'id' => 'required',
+        'user_id' => 'required',
+        'status' => 'required'
+      ]);
+
+
+      $updateData['status'] = $request['status'] == 'on' ? 1 : 0;
+      $updateData['transaction_id'] = $request['transaction_id'];
+      $updateData['remark'] = $request['remark'];
+      $response = Payment::where(['user_id' => $data['user_id'],'id' => $data['id']])->update($updateData);
+      if($response){
+        return response()->json([
+          'message'=>'User Payment Updated',
+          'type'=>'success'
+        ]);  
+      }else{
+        return response()->json([
+          'message' => 'Opps! Operation failed',
+          'type'=>'failed'
+        ], 401);
+      }
+    }
     // User Functions-------------------------------------------------------
     public function register(Request $request){
         $request->validate([
@@ -762,26 +971,26 @@ class Controller extends BaseController
       return;
     }
 
-    public function getDocument($user_id = 0){
+    public function getDocument($property_id = 0){
       
-      if($user_id == 0)
+      if($property_id == 0)
         return response()->json([
           'message'=>'Invalid Access',
           'html' => '',
           'type'=>'error'
         ]);
 
-      $data = Documents::where('user_id', $user_id)->get()->toArray();
+      $data = Documents::where('property_id', $property_id)->with('property')->get()->toArray();
 
       if(count($data) > 0 ){
 
+        // <a href="'.url('downloadDoc/'.str_replace(' ','_',$singleData['property']['property_name']).'/'.$singleData['id']).'">
         $html = '';
         foreach($data as $singleData){
-          $html .= '<div class="docCol col-md-3">
-              <a href="'.url('downloadDoc/'.$singleData['user_id'].'/'.$singleData['id']).'">
-                <label for="">'.$singleData['document_name'].'</label>
-              </a>
-              <button type="button" class="btn btn-sm btn-danger" data-user_id="'.$singleData['user_id'].'"  data-id="'.$singleData['id'].'" onclick="deleteDoc(this)"><i class="menu-icon tf-icons bx bx-trash"></i></button>
+          $html .= '<div class="docCol col-md-4">
+              <img src="'.storage_path('app/'.$singleData['document_url']).'" height="150px" width="150px">
+              <label for="">'.$singleData['document_name'].'</label>
+              <button type="button" class="btn btn-sm btn-danger" data-property_id="'.$singleData['property_id'].'"  data-id="'.$singleData['id'].'" onclick="deleteDoc(this)"><i class="menu-icon tf-icons bx bx-trash"></i></button>
           </div>';
         }
 
@@ -970,50 +1179,4 @@ class Controller extends BaseController
       echo bcrypt($password);
     }
     
-
-
-    // Frontend View Functions
-    public function home(){
-      $data['title'] = 'Ruby Holidays';
-      $data['contact_details'] = [
-        'mobile' => '+919004198880',
-        'email' => 'sales@rubyholidaysonline.com',
-        'address' => '127/129 Old hanuman lane, Kalbadevi, Marine lines , Mumbai , Maharashtra - 400002',
-        'founder' => 'Bhavik Udeshi'
-      ];
-      return view('frontend.about',$data);
-    }
-
-    public function azerbaijan(){
-      $data['title'] = 'Ruby Holidays';
-      $data['contact_details'] = [
-        'mobile' => '+919004198880',
-        'email' => 'sales@rubyholidaysonline.com',
-        'address' => '127/129 Old hanuman lane, Kalbadevi, Marine lines , Mumbai , Maharashtra - 400002',
-        'founder' => 'Bhavik Udeshi'
-      ];
-      return view('frontend.azerbaijan',$data);
-    }
-
-    public function georgia(){
-      $data['title'] = 'Ruby Holidays';
-      $data['contact_details'] = [
-        'mobile' => '+919004198880',
-        'email' => 'sales@rubyholidaysonline.com',
-        'address' => '127/129 Old hanuman lane, Kalbadevi, Marine lines , Mumbai , Maharashtra - 400002',
-        'founder' => 'Bhavik Udeshi'
-      ];
-      return view('frontend.georgia',$data);
-    }
-
-    public function contact(){
-      $data['title'] = 'Ruby Holidays';
-      $data['contact_details'] = [
-        'mobile' => '+919004198880',
-        'email' => 'sales@rubyholidaysonline.com',
-        'address' => '127/129 Old hanuman lane, Kalbadevi, Marine lines , Mumbai , Maharashtra - 400002',
-        'founder' => 'Bhavik Udeshi'
-      ];
-      return view('frontend.contact',$data);
-    }
   }

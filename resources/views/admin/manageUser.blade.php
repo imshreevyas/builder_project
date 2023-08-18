@@ -124,10 +124,6 @@
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Mobile</th>
-                                            <th>Property Name</th>
-                                            <th>EMI Amount</th>
-                                            <th>EMI Count</th>
-                                            <th>EMI Expiry Date</th>
                                             <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
@@ -140,10 +136,6 @@
                                             <td>{{ $singledata['name'] }} </td>
                                             <td>{{ $singledata['email'] }}</td>
                                             <td>{{ $singledata['mobile'] }}</td>
-                                            <td>{{ $singledata['property']['property_name'] }}</td>
-                                            <td>{{ $singledata['emi_amount'] }}</td>
-                                            <td>{{ $singledata['emi_count'] }}</td>
-                                            <td>{{ date('d M, Y', strtotime($singledata['emi_expiry_date'])) }}</td>
                                             <td>
                                                 <label class="switch">
                                                     <input type="checkbox" id="status-{{ $singledata['id'] }}"
@@ -155,9 +147,9 @@
                                                 </label>
                                             </td>
                                             <td>
-                                                <a type="button" onclick="showAddPayment('{{$singledata['id']}}')"
-                                                    title="Add New Package"><i
-                                                        class="menu-icon tf-icons bx bx-file"></i></a>
+                                                <a type="button" onclick="showAddProperty('{{$singledata['id']}}')"
+                                                    title="Add New Property"><i
+                                                        class="menu-icon tf-icons bx bx-building"></i></a>
                                                 <a type="button" onclick="editUser({{ json_encode($singledata) }})"
                                                     title="Edit Client Details"><i
                                                         class="menu-icon tf-icons bx bx-edit"></i></a>
@@ -187,7 +179,7 @@
     <!-- / Layout wrapper -->
 
     <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <form id="editUser">
                     @csrf
@@ -195,7 +187,8 @@
                     <input type="hidden" name="key" id="key">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel1">User Details</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" onclick="closeModal()" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
 
@@ -217,86 +210,21 @@
                                     placeholder="Enter Mobile Number" />
                             </div>
                             <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">Emi Amount</label>
-                                <input class="form-control" type="text" id="emi_amount" name="emi_amount"
-                                    placeholder="Enter Emi Amount" />
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">No of EMI</label>
-                                <input class="form-control" type="text" id="emi_count" name="emi_count"
-                                    placeholder="Enter Number of EMI" />
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">EMI expiry Date</label>
-                                <input class="form-control" type="date" id="emi_expiry_date" name="emi_expiry_date" />
-                            </div>
-                            <div class="mb-3 col-md-6">
                                 <label for="email" class="form-label">Password</label>
                                 <input class="form-control" type="text" id="dcrypt_password" name="dcrypt_password"
                                     placeholder="Enter Password" />
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">Select Property Name</label>
-                                <select name="property_id" id="property_id" class="form-control">
-                                    <option value="0">Select Property Name</option>
-                                    <option value="1">Ostwal Phase 1</option>
-                                    @if(count($property) > 0)
-                                    @foreach($property as $singleProperty)
-                                    <option value="{{ $singleProperty['id'] }}">{{ $singleProperty['property_name'] }}
-                                    </option>
-                                    @endforeach
-                                    @endif
 
-                                </select>
-                            </div>
                         </div>
+                        <hr>
+                        <div class="row property-div"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary" id="process" name="process" value="update">Save
                             changes</button>
-                    </div>
-            </div>
-            </form>
-        </div>
-    </div>
-
-
-    <div class="modal fade" id="basicModal2" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <form id="addUserPackage">
-                    @csrf
-                    <input type="hidden" name="id" id="id">
-                    <input type="hidden" class="key" name="key" id="key">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel1">User Package Details</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-
-                        {{-- Add Package --}}
-                        <div class="row">
-                            <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">Select Package</label>
-                                <select name="package_id" id="package_id" class="form-control">
-                                    <option value="0">Select Package</option>
-                                    @if(count($property) > 0)
-                                    @foreach($property as $singleProperty)
-                                    <option value="{{ $singleProperty['id'] }}">{{ $singleProperty['property_name'] }}
-                                    </option>
-                                    @endforeach
-                                    @endif
-
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" id="process" name="process" value="update">Save
-                            changes</button>
-                        <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">
-                            Close
-                        </button>
+                        <button type="button" class="btn btn-primary" id="append_property" data-value="0"
+                            onclick="appendProperty(this)" value="update">Add
+                            Property</button>
                     </div>
             </div>
             </form>
@@ -304,46 +232,40 @@
     </div>
 
     <!-- Payment Add Modal -->
-    <div class="modal fade" id="basicModal3" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="propertyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-                <form id="addUserPayment">
+                <form id="userPropertyForm">
                     @csrf
-                    <input type="hidden" name="id" id="id">
+                    <input type="hidden" name="user_id" id="user_id">
                     <input type="hidden" class="key" name="key" id="key">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel1">User Payment Details</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            onclick="clearUserPropertyModal()" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-
-                        {{-- Add Package --}}
                         <div class="row">
-                            <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">Select Package</label>
-                                <select name="package_id" id="package_id" class="form-control">
-                                    <option value="0">Select Package</option>
-                                    @if(count($property) > 0)
-                                    @foreach($property as $singleProperty)
-                                    <option value="{{ $singleProperty['id'] }}">{{ $singleProperty['property_name'] }}
-                                    </option>
-                                    @endforeach
-                                    @endif
-
-                                </select>
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label">Select Payment Date</label>
-                                <input type="date" name="payment_date" id="payment_date" class="form-control">
-                            </div>
+                            <table class="table table-responsive table-bordered">
+                                <thead>
+                                    <th>Property Name</th>
+                                    <th>Emi Amount</th>
+                                    <th>Emi Count</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </thead>
+                                <tbody class="userPropertyTable"></tbody>
+                            </table>
                         </div>
+
+                        <hr>
+                        <div class="row user-property-div"></div>
                     </div>
                     <div class="modal-footer">
+                        <button type="button" onclick="appendUserProperty(this)" class="btn btn-primary" data-value="0"
+                            id="append_user_property" name="process" value="update">Add New Property</button>
                         <button type="submit" class="btn btn-primary" id="process" name="process" value="update">Save
                             changes</button>
-                        <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">
-                            Close
-                        </button>
                     </div>
             </div>
             </form>
@@ -388,15 +310,97 @@
 
 
     <script>
+    async function appendProperty(e) {
+        var key = $(e).attr('data-value');
+        var newValue = parseInt(key) + 1;
+        axios.get(`${url}/admin/getPropertyOptions`).then(function(response) {
+            var html = `<div class="row property-div-${key}">
+                <div class="mb-3 col-md-4">
+                    <label for="email" class="form-label">Property Name</label>
+                    <select name="property[${key}][property_id]" id="property[${key}][property_id]" class="form-control">
+                        <option value="0">Select Property</option>
+                        ${response.data.data}
+                    </select>
+                </div>
+                <div class="mb-3 col-md-3">
+                    <label for="email" class="form-label">Emi Amount</label>
+                    <input class="form-control" type="text" id="property[${key}][emi_amount]" name="property[${key}][emi_amount]"
+                        placeholder="Amount" />
+                </div>
+                <div class="mb-3 col-md-2">
+                    <label for="email" class="form-label">No of EMI</label>
+                    <input class="form-control" type="text" id="property[${key}][emi_count]" name="property[${key}][emi_count]"
+                        placeholder="No of EMI" />
+                </div>
+                <div class="mb-3 col-md-2">
+                    <label for="email" class="form-label">1st EMI Date</label>
+                    <input class="form-control" type="date" id="property[${key}][first_emi_date]" name="property[${key}][first_emi_date]"/>
+                </div>
+                <div class="mb-3 col-md-1">
+                    <button type="button" class="btn-danger btn btn-sm" onclick="deleteDiv('property-div-${key}')"><i class="menu-icon tf-icons bx bx-trash"></i></button>
+                </div>
+            </div>`;
+
+            $('.property-div').append(html);
+            $(e).attr('data-value', newValue);
+        }).catch(function(err) {
+            return err;
+        })
+    }
+
+    async function appendUserProperty(e) {
+        var key = $(e).attr('data-value');
+        var newValue = parseInt(key) + 1;
+        axios.get(`${url}/admin/getPropertyOptions`).then(function(response) {
+            var html = `<div class="row property-div-${key}">
+                <div class="mb-3 col-md-4">
+                    <label for="email" class="form-label">Property Name</label>
+                    <select name="property[${key}][property_id]" id="property[${key}][property_id]" class="form-control">
+                        <option value="0">Select Property</option>
+                        ${response.data.data}
+                    </select>
+                </div>
+                <div class="mb-3 col-md-3">
+                    <label for="email" class="form-label">Emi Amount</label>
+                    <input class="form-control" type="text" id="property[${key}][emi_amount]" name="property[${key}][emi_amount]"
+                        placeholder="Amount" />
+                </div>
+                <div class="mb-3 col-md-2">
+                    <label for="email" class="form-label">No of EMI</label>
+                    <input class="form-control" type="text" id="property[${key}][emi_count]" name="property[${key}][emi_count]"
+                        placeholder="No of EMI" />
+                </div>
+                <div class="mb-3 col-md-2">
+                    <label for="email" class="form-label">1st EMI Date</label>
+                    <input class="form-control" type="date" id="property[${key}][first_emi_date]" name="property[${key}][first_emi_date]"/>
+                </div>
+                <div class="mb-3 col-md-1">
+                    <button type="button" class="btn-danger btn btn-sm" onclick="deleteDiv('property-div-${key}')"><i class="menu-icon tf-icons bx bx-trash"></i></button>
+                </div>
+            </div>`;
+
+            $('.user-property-div').append(html);
+            $(e).attr('data-value', newValue);
+        }).catch(function(err) {
+            return err;
+        })
+    }
+
+    function deleteDiv(key) {
+        $(`.${key}`).remove();
+    }
+
     function closeModal() {
-        $('.newRow').remove(); //remove all add on documents
+        $('.property-div').html(''); //remove all add on documents
         $('#editUser')[0].reset(); // remove all data in inputs
         $('#basicModal').modal('hide'); //hide the modal 
     }
 
-    function closeModal() {
-        $('.docCol').remove(); //remove all add on documents
-        $('#docModal').modal('hide'); //hide the modal 
+    function clearUserPropertyModal() {
+        $('.user-property-div').html(''); //remove all add on documents
+        $('.userPropertyTable').html(''); //remove all add on documents
+        $('#userPropertyForm')[0].reset(); // remove all data in inputs
+        $('#propertyModal').modal('hide'); //hide the modal 
     }
 
     function show_Toaster(message, type) {
@@ -441,11 +445,39 @@
         $('#basicModal').modal('show');
     }
 
-    function showAddPackage(key) {
-        document.getElementById("addUserPackage").reset();
-        $('#process').val('add')
-        $('.key').val(key)
-        $('#basicModal2').modal('show');
+    function showAddProperty(user_id) {
+        // $('#basicModal3').modal('show');
+        // return;
+        axios.post(`${url}/admin/getUserProperties`, {
+            user_id
+        }).then(function(response) {
+            $('#user_id').val(user_id);
+            $('.userPropertyTable').html(response.data.data)
+            $('#propertyModal').modal('show');
+        }).catch(function(err) {
+            return err;
+        })
+
+    }
+
+    function closeEMI(e) {
+
+        if (confirm('Are you sure?')) {
+            var user_id = $(e).attr('data-user_id');
+            var map_id = $(e).attr('data-map_id');
+            $(e).text('Please wait...');
+            axios.post(`${url}/admin/closeUserProperty`, {
+                user_id,
+                map_id
+            }).then(function(response) {
+                show_Toaster(response.data.message, response.data.type)
+                $('.userPropertyTable').html(response.data.data)
+                $('#propertyModal').modal('show');
+            }).catch(function(err) {
+                return err;
+            })
+        }
+
     }
 
     function showAddPayment(key) {
@@ -473,34 +505,15 @@
         })
     });
 
-    $('#addUserPackage').submit(function(e) {
+    $('#userPropertyForm').submit(function(e) {
         e.preventDefault();
         var formdata = new FormData(this);
-        formdata.append('process', $('#process').val());
-        axios.post(`${url}/admin/addUserPackage`, formdata).then(function(response) {
+        axios.post(`${url}/admin/addUserProperty`, formdata).then(function(response) {
             // handle success
             show_Toaster(response.data.message, response.data.type)
             if (response.data.type === 'success') {
-                setTimeout(() => {
-                    window.location.href = `${url}/admin/allUsers`;
-                }, 500);
-            }
-        }).catch(function(err) {
-            show_Toaster(err.response.data.message, 'error')
-        })
-    });
-
-    $('#addUserPayment').submit(function(e) {
-        e.preventDefault();
-        var formdata = new FormData(this);
-        formdata.append('process', $('#process').val());
-        axios.post(`${url}/admin/addUserPayment`, formdata).then(function(response) {
-            // handle success
-            show_Toaster(response.data.message, response.data.type)
-            if (response.data.type === 'success') {
-                setTimeout(() => {
-                    window.location.href = `${url}/admin/allUsers`;
-                }, 500);
+                $('.userPropertyTable').html(response.data.data)
+                $('.user-property-div').html('');
             }
         }).catch(function(err) {
             show_Toaster(err.response.data.message, 'error')
@@ -581,7 +594,6 @@
         $(e).val(lastkey)
         $('.docrow-0').append(html);
     }
-
 
     function deleteRow(className) {
         $(`.${className}`).remove();

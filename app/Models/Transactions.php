@@ -11,8 +11,14 @@ class Transactions extends Model
     protected $table = 'transactions';
     protected $fillable = [
         'user_id',
-        'package_id',
-        'amount',
+        'property_id',
+        'emi_count',
+        'emi_amount',
+        'due_date',
+        'transaction_id',
+        'remarks',
+        'status',
+        'updated_by',
         'created_at',
         'updated_at'
     ];

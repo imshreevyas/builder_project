@@ -19,10 +19,12 @@ class UserProperty extends Model
      */
     protected $table = 'user_properties';
     protected $fillable = [
+        'map_id',
         'user_id',
         'property_id',
         'emi_amount',
         'emi_count',
+        'first_emi_date',
         'status',
     ];
 
@@ -37,4 +39,8 @@ class UserProperty extends Model
      * @var array<string, string>
      */
 
+     public function property()
+    {
+        return $this->belongsTo(Property::class);
+    }
 }

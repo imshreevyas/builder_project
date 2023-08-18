@@ -15,11 +15,17 @@ class Payment extends Model
         'emi_count',
         'emi_amount',
         'due_date',
-        'transaction_id',
+        'map_id',
+        'transaction_id', 
         'remark',
         'status',
         'updated_by',
         'created_at',
         'updated_at'
     ];
+
+    public function property()
+    {
+        return $this->belongsTo(Property::class);
+    }
 }
