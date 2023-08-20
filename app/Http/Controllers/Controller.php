@@ -70,9 +70,9 @@ class Controller extends BaseController
     public function adminDashboard(Request $request){
       $this->checkUserType($request);
       $data['usercount'] = User::all()->count();
-      $data['packagecount'] = Packages::all()->count();
-      $data['paymentcount'] = Payment::sum("amount");
-      $data['users'] = User::select('*')->with('package')->orderBy('id', 'desc')->limit(10)->get()->toArray();
+      $data['packagecount'] = Property::all()->count();
+      $data['paymentcount'] = Payment::where('status',1)->sum("emi_amount");
+      $data['payments'] = Payment::select('*')->whereMonth('due_date', date('m'))->whereYear('due_date',date('Y'))->where('status', 0)->with('user')->with('property')->orderBy('id', 'desc')->limit(10)->get()->toArray();
       $data['ticket'] = Support::select('*')->with('user')->orderBy('id', 'desc')->get()->toArray();
 
       // dd($data['ticket']);
@@ -103,7 +103,6 @@ class Controller extends BaseController
         'email' => 'required|string|email',
         'mobile' => 'required|string',
         'address' => 'required|string',
-        'website' => 'required|string',
       ]);
       
       if ($request->logo){
@@ -120,7 +119,6 @@ class Controller extends BaseController
 
       }
        
-      $user['website'] = strpos($request->website, 'http') !== false || strpos($request->website, 'https') !== false ? $request->website : 'https://'.$request->website;
       $update = Admin::where('id',Auth::guard('admin')->user()->id)->update($user);
 
       if($update){
@@ -987,10 +985,13 @@ class Controller extends BaseController
         // <a href="'.url('downloadDoc/'.str_replace(' ','_',$singleData['property']['property_name']).'/'.$singleData['id']).'">
         $html = '';
         foreach($data as $singleData){
-          $html .= '<div class="docCol col-md-4">
-              <img src="'.storage_path('app/'.$singleData['document_url']).'" height="150px" width="150px">
+          $html .= '<div class="row"><div class="docCol col-md-8">
+              <img src="'.url('storage/app/'.$singleData['document_url']).'" height="150px" width="150px">
+              <div class="col-md-6">
               <label for="">'.$singleData['document_name'].'</label>
               <button type="button" class="btn btn-sm btn-danger" data-property_id="'.$singleData['property_id'].'"  data-id="'.$singleData['id'].'" onclick="deleteDoc(this)"><i class="menu-icon tf-icons bx bx-trash"></i></button>
+              </div>
+              </div>
           </div>';
         }
 

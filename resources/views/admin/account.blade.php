@@ -70,12 +70,6 @@
                                                     <input type="text" class="form-control" value="{{$data['address']}}"
                                                         id="address" name="address" placeholder="Enter Address" />
                                                 </div>
-
-                                                <div class="mb-3 col-md-6">
-                                                    <label for="mobile" class="form-label">Website</label>
-                                                    <input type="text" class="form-control" value="{{$data['website']}}"
-                                                        id="website" name="website" placeholder="Enter Website" />
-                                                </div>
                                             </div>
                                             <div class="row">
                                                 <div class="mb-3 col-md-6">

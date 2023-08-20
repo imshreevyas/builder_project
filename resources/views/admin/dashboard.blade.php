@@ -126,7 +126,7 @@
                                         <div class="card">
                                             <div class="card-body">
                                                 <span class="d-block mb-1 avatar-initial rounded text-primary"><i
-                                                        class="menu-icon tf-icons bx bx-user"></i>Total Packages</span>
+                                                        class="menu-icon tf-icons bx bx-user"></i>Total Property</span>
                                                 <h3 class="card-title text-nowrap mb-2">{{ $packagecount ?: 0 }}</h3>
                                             </div>
                                         </div>
@@ -135,7 +135,8 @@
                                         <div class="card">
                                             <div class="card-body">
                                                 <span class="d-block mb-1 avatar-initial rounded text-primary"><i
-                                                        class="menu-icon tf-icons bx bx-user"></i>Total Sale</span>
+                                                        class="menu-icon tf-icons bx bx-user"></i>Total EMI
+                                                    Received</span>
                                                 <h3 class="card-title text-nowrap mb-2">{{ $paymentcount ?: 0 }}</h3>
                                             </div>
                                         </div>
@@ -154,82 +155,46 @@
                             <div class="col-md-12">
                                 <div class="card">
                                     <div style="display: flex;">
-                                        <h5 class="card-header">Latest 10 Users</h5>
+                                        <h5 class="card-header">This Month Comin EMI</h5>
                                     </div>
                                     <div class="table table-responsive">
                                         <table id="table_id" class="display">
                                             <thead>
                                                 <tr>
                                                     <th>Sr No.</th>
-                                                    <th>Name</th>
-                                                    <th>Email</th>
-                                                    <th>Mobile</th>
-                                                    <th>Package</th>
-                                                    <th>Expiry Date</th>
+                                                    <th>User Name</th>
+                                                    <th>Property Name</th>
+                                                    <th>Emi Amount</th>
+                                                    <th>Due Date</th>
                                                     <th>Status</th>
+                                                    <th>action</th>
                                                 </tr>
                                             </thead>
                                             <tbody class="table-border-bottom-0">
                                                 @php($i = 1)
-                                                @foreach ($users as $singledata)
+                                                @foreach ($payments as $singledata)
                                                 <tr>
                                                     <td>{{ $i++; }}</td>
-                                                    <td>{{ $singledata['name'] }} </td>
-                                                    <td>{{ $singledata['email'] }}</td>
-                                                    <td>{{ $singledata['mobile'] }}</td>
-                                                    <td>{{ $singledata['package']['package_name'] }}</td>
-                                                    <td>{{ date('d M, Y', strtotime($singledata['expiry_date'])) }}</td>
-                                                    <td>
-                                                        <label class="switch">
-                                                            <input type="checkbox" id="status-{{ $singledata['key'] }}"
-                                                                onclick="updateUserStatus(this)"
-                                                                data-key="{{ $singledata['key'] }}"
-                                                                data-value="{{ $singledata['status'] == 1 ? '0' : '1' }}"
-                                                                {{ $singledata['status'] == 1 ? 'checked' : '' }}>
-                                                            <span class="slider"></span>
-                                                        </label>
+                                                    <td>{{ $singledata['user']['name'] }} </td>
+                                                    <td>{{ $singledata['property']['property_name'] }}</td>
+                                                    <td>{{ $singledata['emi_amount'] }}</td>
+                                                    <td>{{ date('d M, Y', strtotime($singledata['due_date'])) }}</td>
+                                                    <td>@if($singledata['status'] == 0)
+                                                        <span class="badge bg-warning">Pending</span>
+                                                        @else
+                                                        <span class="badge bg-success">Paid</span>
+                                                        @endif
                                                     </td>
-                                                </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <br>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="card">
-                                    <div style="display: flex;">
-                                        <h5 class="card-header">Support Tickets</h5>
-                                    </div>
-                                    <div class="table table-responsive">
-                                        <table id="table_id1" class="display">
-                                            <thead>
-                                                <tr>
-                                                    <th>Ticket ID</th>
-                                                    <th>Username</th>
-                                                    <th>Query</th>
-                                                    <th>Reply</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="table-border-bottom-0">
-                                                @php($i = 1)
-                                                @foreach ($ticket as $singleticket)
-                                                <tr>
-                                                    <td>{{ $singleticket['id'] }}</td>
-                                                    <td><i class="fab fa-angular fa-lg text-danger me-3"></i>
-                                                        {{ $singleticket['user']['name'] }} </td>
-                                                    <td>{{ $singleticket['ticket'] }}</td>
-                                                    <td>{{ $singleticket['reply'] }}</td>
                                                     <td>
-                                                        <a type="button"
-                                                            onclick="supportReply('{{$singleticket['id']}}')"
-                                                            title="Client Documents"><i
-                                                                class="menu-icon tf-icons bx bx-edit"></i></a>
+                                                        @if($singledata['status'] == 0)
+                                                        <button type="button" class="btn btn-sm btn-danger"
+                                                            onclick="updateStatus(this)"
+                                                            data-id="{{ $singledata['id'] }}"
+                                                            data-user_id="{{ $singledata['user_id'] }}"
+                                                            title="Update Client Data">Update Payment Status</button>
+                                                        @else
+                                                        ----
+                                                        @endif
                                                     </td>
                                                 </tr>
                                                 @endforeach
@@ -255,26 +220,41 @@
         <!-- Overlay -->
         <div class="layout-overlay layout-menu-toggle"></div>
 
-        <!-- Support Reply Add Modal -->
-        <div class="modal fade" id="supportReply" tabindex="-1" aria-hidden="true">
+        <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <form id="supportReplyForm">
+                    <form id="paymentForm">
                         @csrf
                         <input type="hidden" name="id" id="id">
+                        <input type="hidden" name="user_id" id="user_id">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel1">Payment Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
                         <div class="modal-body">
-                            <div class="row">
 
+                            {{-- contact details --}}
+                            <div class="row">
+                                <div class="mb-3 col-md-6">
+                                    <label for="firstName" class="form-label">Transaction ID</label>
+                                    <input class="form-control" type="text" id="transaction_id" name="transaction_id"
+                                        placeholder="Enter Transaction ID" />
+                                </div>
                                 <div class="mb-3 col-md-12">
-                                    <label for="email" class="form-label">Add Reply</label>
-                                    <textarea class="form-control" id="reply" name="reply"></textarea>
+                                    <label for="email" class="form-label">Remarks</label>
+                                    <textarea class="form-control" type="text" id="remark" name="remark"
+                                        placeholder="Enter Remarks"></textarea>
+                                </div>
+                                <div class="mb-3 col-md-12">
+                                    <label for="email" class="form-label">Amount Received ? </label>
+                                    <input type="checkbox" id="status" name="status" required>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-primary" id="process" name="process"
-                                value="update">Save
-                                changes</button>
+                                value="update">Update
+                                Status</button>
                             <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">
                                 Close
                             </button>
@@ -304,7 +284,6 @@
     <script>
     $(document).ready(function() {
         $('#table_id').DataTable();
-        $('#table_id1').DataTable();
     });
 
     function show_Toaster(message, type) {
@@ -324,57 +303,29 @@
         }).showToast();
     }
 
-    function updateUserStatus(e) {
-        value = $(e).attr('data-value');
-        id = $(e).attr('id');
-        if (confirm('Are you sure, you want to ' + (value == 1 ? 'Activate' : 'Deactivate'))) {
-            key = $(e).attr('data-key');
-
-            axios.post(`${url}/admin/updateUserStatus`, {
-                key,
-                value,
-            }).then(function(response) {
-                // handle success
-                show_Toaster(response.data.message, response.data.type)
-                if (response.data.type === 'success') {
-
-                    $(e).attr('data-value', (value == 1 ? 0 : 1));
-                    document.getElementById(id).checked = value == 1 ? true : false;
-                    // setTimeout(() => {
-                    //     window.location.href = `${url}/admin/allUsers`;
-                    // }, 500);
-                }
-            }).catch(function(err) {
-                show_Toaster(err.response.data.message, 'error')
-            })
-
-        } else {
-            document.getElementById(id).checked = value == 1 ? false : true;
-            return false;
-        }
-    }
-
 
     function closeModal() {
-        $('#supportReplyForm').trigger("reset"); // Form Reset
-        $('#supportReply').modal('hide'); //hide the modal 
+        $('#paymentForm')[0].reset(); // remove all data in inputs
+        $('#basicModal').modal('hide'); //hide the modal 
     }
 
-    function supportReply(id) {
-        $('#id').val(id)
-        $('#supportReply').modal('show');
+    function updateStatus(e) {
+        $('#id').val($(e).attr('data-id'))
+        $('#user_id').val($(e).attr('data-user_id'))
+        $('#process').val('add');
+        $('#basicModal').modal('show');
     }
 
-    $('#supportReplyForm').submit(function(e) {
+    $('#paymentForm').submit(function(e) {
         e.preventDefault();
         var formdata = new FormData(this);
         formdata.append('process', $('#process').val());
-        axios.post(`${url}/admin/supportReply`, formdata).then(function(response) {
+        axios.post(`${url}/admin/updateUserPaymentDetails`, formdata).then(function(response) {
             // handle success
             show_Toaster(response.data.message, response.data.type)
             if (response.data.type === 'success') {
                 setTimeout(() => {
-                    window.location.href = `${url}/admin/dashboard`;
+                    location.reload();
                 }, 500);
             }
         }).catch(function(err) {

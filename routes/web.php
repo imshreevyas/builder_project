@@ -80,6 +80,7 @@ Route::get('/',[Controller::class,'adminLogin']);
 Route::prefix('admin')->group(function () {
     
     // Get Routes
+    Route::get('/',[Controller::class,'adminLogin'])->name('adminLogin');
     Route::get('/login',[Controller::class,'adminLogin'])->name('adminLogin');
     Route::get('/dashboard',[Controller::class,'adminDashboard'])->name('adminDashboard');
     Route::get('/allUsers',[Controller::class,'allUsers'])->name('allUsers');
