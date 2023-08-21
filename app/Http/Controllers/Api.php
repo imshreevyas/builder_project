@@ -42,9 +42,20 @@ class Api extends Controller
         else
             return response()->json(['message' => 'Something went wrong!'], 401);
     }
+    public function propertyDetail(Request $request)
+    {
+        $data = Property::where(['status' => 1, 'id' => $request->id])->with('documents')->get();
+        if ($data)
+            return response()->json([
+                'message' => 'success',
+                'data' => $data
+            ], 200);
+        else
+            return response()->json(['message' => 'Something went wrong!'], 401);
+    }
     public function userProperties(Request $request)
     {
-        $data = UserProperty::where(['status' => 1, 'user_id' => $request->user()->id])->get();
+        $data = Property::join('user_properties', 'user_properties.property_id', 'properties.id')->where(['properties.status' => 1, 'user_properties.user_id' => $request->user()->id])->with('documents')->get();
         if ($data)
             return response()->json([
                 'message' => 'success',
@@ -85,8 +96,8 @@ class Api extends Controller
             'c_password' => 'required|same:password',
         ]);
         $pass['password'] = Hash::make($data['password']);
-        $save = new User($pass);
-        if ($save->save())
+        $pass['dcrypt_password'] = $data['password'];
+        if (User::where('id', $request->user()->id)->update($pass))
             return response()->json([
                 'message' => 'Password changed successfully!',
                 'status' => 1

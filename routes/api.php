@@ -21,11 +21,12 @@ Route::get('/test', function () {
         'message' => 'Hello World!',
     ], 200);
 });
+Route::get('/properties', [Api::class, 'properties'])->name('properties');
+Route::post('/propertyDetail', [Api::class, 'propertyDetail'])->name('propertyDetail');
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     })->name('user');
-    Route::get('/properties', [Api::class, 'properties'])->name('properties');
     Route::get('/userProperties', [Api::class, 'userProperties'])->name('userProperties');
     Route::post('/transactionList', [Api::class, 'transactionList'])->name('transactionList');
     Route::post('/transactionDetail', [Api::class, 'transactionDetail'])->name('transactionDetail');

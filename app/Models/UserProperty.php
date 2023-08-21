@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -39,8 +40,12 @@ class UserProperty extends Model
      * @var array<string, string>
      */
 
-     public function property()
+    public function property(): BelongsTo
     {
-        return $this->belongsTo(Property::class);
+        return $this->belongsTo(Property::class,'property_id','id');
+    }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class,'user_id','id');
     }
 }
