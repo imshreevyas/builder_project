@@ -32,5 +32,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/transactionDetail', [Api::class, 'transactionDetail'])->name('transactionDetail');
     Route::post('/profileUpdate', [Api::class, 'profileUpdate'])->name('resetPassword');
     Route::post('/resetPassword', [Api::class, 'resetPassword'])->name('resetPassword');
+    Route::post('/logout',[Api::class,'userLogout'])->name('logout');
 });
 

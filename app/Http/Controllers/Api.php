@@ -105,4 +105,12 @@ class Api extends Controller
         else
             return response()->json(['message' => 'Something went wrong!', 'status' => 0], 401);
     }
+    public function userLogout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json([
+            'message' => 'Logout successfully!',
+            'status' => 1
+        ], 200);
+    }
 }

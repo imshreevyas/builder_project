@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('email',100)->unique();
             $table->string('mobile',12)->unique();
             $table->string('address',100)->nullable();
+            $table->string('expo_push_token',255)->nullable();
             $table->string('dcrypt_password');
             $table->string('password');
             $table->string('last_login')->nullable();
