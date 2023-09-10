@@ -23,6 +23,9 @@ class User extends Authenticatable
         'password',
         'email',
         'mobile',
+        'profile',
+        'aadhar',
+        'pancard',
         'address',
         'dcrypt_password',
         'last_login'

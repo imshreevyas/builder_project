@@ -30,7 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/userProperties', [Api::class, 'userProperties'])->name('userProperties');
     Route::post('/transactionList', [Api::class, 'transactionList'])->name('transactionList');
     Route::post('/transactionDetail', [Api::class, 'transactionDetail'])->name('transactionDetail');
-    Route::post('/profileUpdate', [Api::class, 'profileUpdate'])->name('resetPassword');
+    Route::post('/profileUpdate', [Api::class, 'profileUpdate'])->name('profileUpdate');
     Route::post('/resetPassword', [Api::class, 'resetPassword'])->name('resetPassword');
     Route::post('/logout',[Api::class,'userLogout'])->name('logout');
 });

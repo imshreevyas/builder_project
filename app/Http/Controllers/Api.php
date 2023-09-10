@@ -21,7 +21,6 @@ class Api extends Controller
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             $token = $user->createToken('auth')->plainTextToken;
-
             return response()->json([
                 'message' => 'success',
                 'user' => $user,
@@ -30,6 +29,19 @@ class Api extends Controller
         }
 
         return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+    public function profileUpdate(Request $request)
+    {
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $fileName = time() . '_' . $image->getClientOriginalName();
+            $image->storeAs('public/images', $fileName); // This stores the image in storage/app/public/images
+            $data['profile'] = 'storage/images/' . $fileName;
+            User::where('id',$request->user()->id)->update($data);
+            return response()->json(['message' => 'Image uploaded successfully']);
+        }
+
+        return response()->json(['message' => 'No image uploaded'], 400);
     }
     public function properties()
     {
@@ -55,7 +67,7 @@ class Api extends Controller
     }
     public function userProperties(Request $request)
     {
-        $data = Property::join('user_properties', 'user_properties.property_id', 'properties.id')->where(['properties.status' => 1, 'user_properties.user_id' => $request->user()->id])->with('documents')->get();
+        $data = UserProperty::where('user_id', $request->user()->id)->with('property.documents')->get();
         if ($data)
             return response()->json([
                 'message' => 'success',
@@ -79,7 +91,7 @@ class Api extends Controller
 
     public function transactionDetail(Request $request)
     {
-        $data = Payment::where(['status' => 1, 'user_id' => $request->user()->id, 'id' => $request->id])->get();
+        $data = Payment::where(['status' => 1, 'user_id' => $request->user()->id, 'id' => $request->id])->with('property.documents')->get();
         if ($data)
             return response()->json([
                 'message' => 'success',
