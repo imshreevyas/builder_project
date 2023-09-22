@@ -32,16 +32,29 @@ class Api extends Controller
     }
     public function profileUpdate(Request $request)
     {
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $fileName = time() . '_' . $image->getClientOriginalName();
-            $image->storeAs('public/images', $fileName); // This stores the image in storage/app/public/images
-            $data['profile'] = 'storage/images/' . $fileName;
-            User::where('id',$request->user()->id)->update($data);
-            return response()->json(['message' => 'Image uploaded successfully']);
+        if ($request->photo) {
+            if ($request->type == 1) {
+                if (User::where('id', $request->user()->id)->update(['profile' => $request->photo]))
+                    return response()->json(['message' => 'Image uploaded successfully', 'status' => 'success']);
+            } else if ($request->type == 2) {
+                if (User::where('id', $request->user()->id)->update(['aadhar' => $request->photo]))
+                    return response()->json(['message' => 'Image uploaded successfully', 'status' => 'success']);
+            } else if ($request->type == 3) {
+                if (User::where('id', $request->user()->id)->update(['pancard' => $request->photo]))
+                    return response()->json(['message' => 'Image uploaded successfully', 'status' => 'success']);
+            }
+            return response()->json(['message' => 'Something went wrong!', 'status' => 'fail'], 401);
         }
 
-        return response()->json(['message' => 'No image uploaded'], 400);
+        return response()->json(['message' => 'No image uploaded', 'status' => 'fail'], 400);
+    }
+    public function updateNotificationId(Request $request){
+        if ($request->notificationId) {
+            if (User::where('id', $request->user()->id)->update(['expo_push_token' => $request->notificationId]))
+            return response()->json(['message' => 'Token updated successfully', 'status' => 'success']);
+        }
+
+        return response()->json(['message' => 'Please pass token', 'status' => 'fail'], 400);
     }
     public function properties()
     {

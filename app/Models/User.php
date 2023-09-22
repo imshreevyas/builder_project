@@ -26,6 +26,7 @@ class User extends Authenticatable
         'profile',
         'aadhar',
         'pancard',
+        'expo_push_token',
         'address',
         'dcrypt_password',
         'last_login'
