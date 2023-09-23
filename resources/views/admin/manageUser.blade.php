@@ -249,8 +249,9 @@
                             <table class="table table-responsive table-bordered">
                                 <thead>
                                     <th>Property Name</th>
-                                    <th>Emi Amount</th>
-                                    <th>Emi Count</th>
+                                    <th>Total Amount</th>
+                                    <th>Total Amount Paid</th>
+                                    <th>Flat No.</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </thead>
@@ -323,18 +324,14 @@
                     </select>
                 </div>
                 <div class="mb-3 col-md-3">
-                    <label for="email" class="form-label">Emi Amount</label>
-                    <input class="form-control" type="text" id="property[${key}][emi_amount]" name="property[${key}][emi_amount]"
-                        placeholder="Amount" />
+                    <label for="email" class="form-label">Total Amount</label>
+                    <input class="form-control" type="text" id="property[${key}][total_amount]" name="property[${key}][total_amount]"
+                        placeholder="Total" />
                 </div>
                 <div class="mb-3 col-md-2">
-                    <label for="email" class="form-label">No of EMI</label>
-                    <input class="form-control" type="text" id="property[${key}][emi_count]" name="property[${key}][emi_count]"
-                        placeholder="No of EMI" />
-                </div>
-                <div class="mb-3 col-md-2">
-                    <label for="email" class="form-label">1st EMI Date</label>
-                    <input class="form-control" type="date" id="property[${key}][first_emi_date]" name="property[${key}][first_emi_date]"/>
+                    <label for="email" class="form-label">Flat No.</label>
+                    <input class="form-control" type="text" id="property[${key}][flat_no]" name="property[${key}][flat_no]"
+                        placeholder="flatno" />
                 </div>
                 <div class="mb-3 col-md-1">
                     <button type="button" class="btn-danger btn btn-sm" onclick="deleteDiv('property-div-${key}')"><i class="menu-icon tf-icons bx bx-trash"></i></button>
@@ -361,18 +358,14 @@
                     </select>
                 </div>
                 <div class="mb-3 col-md-3">
-                    <label for="email" class="form-label">Emi Amount</label>
-                    <input class="form-control" type="text" id="property[${key}][emi_amount]" name="property[${key}][emi_amount]"
-                        placeholder="Amount" />
+                    <label for="email" class="form-label">Total Amount</label>
+                    <input class="form-control" type="text" id="property[${key}][total_amount]" name="property[${key}][total_amount]"
+                        placeholder="Total" />
                 </div>
                 <div class="mb-3 col-md-2">
-                    <label for="email" class="form-label">No of EMI</label>
-                    <input class="form-control" type="text" id="property[${key}][emi_count]" name="property[${key}][emi_count]"
-                        placeholder="No of EMI" />
-                </div>
-                <div class="mb-3 col-md-2">
-                    <label for="email" class="form-label">1st EMI Date</label>
-                    <input class="form-control" type="date" id="property[${key}][first_emi_date]" name="property[${key}][first_emi_date]"/>
+                    <label for="email" class="form-label">Flat No.</label>
+                    <input class="form-control" type="text" id="property[${key}][flat_no]" name="property[${key}][flat_no]"
+                        placeholder="flatno" />
                 </div>
                 <div class="mb-3 col-md-1">
                     <button type="button" class="btn-danger btn btn-sm" onclick="deleteDiv('property-div-${key}')"><i class="menu-icon tf-icons bx bx-trash"></i></button>

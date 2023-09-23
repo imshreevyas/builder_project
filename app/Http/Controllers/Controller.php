@@ -202,16 +202,14 @@ class Controller extends BaseController
 
             $propertyData = $request->validate([
               'property.*.property_id' => 'required',
-              'property.*.emi_amount' => 'required|numeric',
-              'property.*.first_emi_date' => 'required|date',
-              'property.*.emi_count' => 'required|numeric',
+              'property.*.total_amount' => 'required|numeric',
+              'property.*.flat_no' => 'required|numeric',
             ],[
               'property.*.property_id.required' => 'Property Name is required!',
-              'property.*.emi_amount.required' => 'Emi Amount is Required',
-              'property.*.first_emi_date.required' => '1st Emi Date is Required',
-              'property.*.emi_amount.numeric' => 'Emi Amount Should be Numeric',
-              'property.*.emi_count.required' => 'Emi Count is Required',
-              'property.*.emi_count.numeric' => 'Emi Count Should be Numeric',
+              'property.*.total_amount.required' => 'Emi Amount is Required',
+              'property.*.total_amount.numeric' => 'Emi Amount Should be Numeric',
+              'property.*.flat_no.required' => 'Emi Count is Required',
+              'property.*.flat_no.numeric' => 'Emi Count Should be Numeric',
             ]);
           }
         }else if($process == 'update'){
@@ -239,7 +237,7 @@ class Controller extends BaseController
                 $singleProperty['map_id'] = uniqid();
                 $userProperty = new UserProperty($singleProperty);
                 $userProperty->save();
-                $this->addEmiPayments($singleProperty['map_id'],$user->id,$singleProperty['property_id'],$singleProperty['emi_count'],$singleProperty['emi_amount'],$singleProperty['first_emi_date']);
+                // $this->addEmiPayments($singleProperty['map_id'],$user->id,$singleProperty['property_id'],$singleProperty['emi_count'],$singleProperty['emi_amount'],$singleProperty['first_emi_date']);
               }
             }
             return response()->json(['message'=>'User Added','type'=>'success']);
@@ -255,9 +253,6 @@ class Controller extends BaseController
             return response()->json(['message' => 'Opps! operation failed','type'=>'failed'], 401);
         }else
           return response()->json(['message' => 'Opps! operation failed','type'=>'failed'], 401);
-
-        
-
     }
 
     public function addUserProperty(Request $request){
@@ -268,7 +263,7 @@ class Controller extends BaseController
           $singleProperty['map_id'] = uniqid();
           $userProperty = new UserProperty($singleProperty);
           $userProperty->save();
-          $this->addEmiPayments($singleProperty['map_id'],$request['user_id'],$singleProperty['property_id'],$singleProperty['emi_count'],$singleProperty['emi_amount'],$singleProperty['first_emi_date']);
+          // $this->addEmiPayments($singleProperty['map_id'],$request['user_id'],$singleProperty['property_id'],$singleProperty['emi_count'],$singleProperty['emi_amount'],$singleProperty['first_emi_date']);
         }
 
         $html = $this->getPropertyTableTd($request['user_id']);
@@ -415,8 +410,9 @@ class Controller extends BaseController
           foreach($property as $singleProperty){
             $html .= '<tr>
                 <td><a href='.('userPropertyPayment/'.$singleProperty['user_id'].'/'.$singleProperty['map_id']).'>'.$singleProperty['property']['property_name'].'</a></td>
-                <td>'.$singleProperty['emi_amount'].'</td>
-                <td>'.$singleProperty['emi_count'].'</td>
+                <td>'.$singleProperty['total_amount'].'</td>
+                <td>'.$singleProperty['total_amount_paid'].'</td>
+                <td>'.$singleProperty['flat_no'].'</td>
                 <td>'.($singleProperty['status'] == 0 ? '<span class="badge bg-danger">Closed</span>' : '<span class="badge bg-success">Open</span>').'</td><td>';
                 
             if($singleProperty['status'] == 1){
@@ -630,22 +626,74 @@ class Controller extends BaseController
 
     public function userPropertyPayment(Request $request,$user_id = 0,$map_id = 0){
       $this->checkUserType($request);
+      $data['map_id'] = $map_id;
+      $data['user_id'] = $user_id;
       $data['payments'] = optional(Payment::where(['user_id' => $user_id,'map_id' => $map_id])->with('property')->get())->toArray();
       return view('admin.manageUserPayments',$data);
     }
 
     public function updateUserPaymentDetails(Request $request){
-      $data = $request->validate([
-        'id' => 'required',
-        'user_id' => 'required',
-        'status' => 'required'
-      ]);
+
+      if($request['process'] == 'update'){
+        
+        $data = $request->validate([
+          'id' => 'required',
+          'map_id' => 'required',
+          'user_id' => 'required',
+          'status' => 'required'
+        ]);
+        
+        $updateData['status'] = $request['status'] == 'on' ? 1 : 0;
+        $updateData['transaction_id'] = $request['transaction_id'];
+        $updateData['remark'] = $request['remark'];
+        
+        // Get user Property Data
+        $user_property_data = optional(UserProperty::where(['user_id' => $data['user_id'],'map_id' => $data['map_id']])->get())->toArray();
+        $user_payments_data = optional(Payment::where(['id' => $data['id']])->orderBy('id','desc')->with('property')->get())->toArray();
+        
+        // Update Total paid Amount
+        $updatePropertyData['total_amount_paid'] = $user_property_data[0]['total_amount_paid'] + $user_payments_data[0]['emi_amount'];
+        UserProperty::where(['user_id' => $data['user_id'],'map_id' => $data['map_id']])->update($updatePropertyData);
+
+        //Update Payment Status
+        $response = Payment::where(['user_id' => $data['user_id'],'id' => $data['id']])->update($updateData);
+
+      }else if($request['process'] == 'add'){
+
+        $data = $request->validate([
+          'map_id' => 'required',
+          'user_id' => 'required',
+          'emi_amount' => 'required',
+          'due_date' => 'required'
+        ]);
+
+        $emi_count = 0;
+        $user_payments_data = optional(Payment::where(['user_id' => $data['user_id'],'map_id' => $data['map_id']])->orderBy('id','desc')->with('property')->get())->toArray();
+        
+        
+        if(count($user_payments_data) > 0){
+          $data['emi_count'] = $user_payments_data[0]['emi_count'] +1;
+          $data['property_id'] = $user_payments_data[0]['property_id'];
+        }else{
+          $user_property_data = optional(UserProperty::where(['user_id' => $data['user_id'],'map_id' => $data['map_id']])->get())->toArray();
+          if(count($user_property_data) > 0){
+            $data['emi_count'] = 1;
+            $data['property_id'] = $user_property_data[0]['property_id'];
+          }else{
+            // return back error no property found
+            return response()->json([
+              'message' => 'Invalid Access',
+              'type'=>'failed'
+            ], 401);
+          }
+        }
 
 
-      $updateData['status'] = $request['status'] == 'on' ? 1 : 0;
-      $updateData['transaction_id'] = $request['transaction_id'];
-      $updateData['remark'] = $request['remark'];
-      $response = Payment::where(['user_id' => $data['user_id'],'id' => $data['id']])->update($updateData);
+
+        $userPayment = new Payment($data);
+        $response = $userPayment->save();
+      }
+            
       if($response){
         return response()->json([
           'message'=>'User Payment Updated',

@@ -190,6 +190,7 @@
                                                         <button type="button" class="btn btn-sm btn-danger"
                                                             onclick="updateStatus(this)"
                                                             data-id="{{ $singledata['id'] }}"
+                                                            data-map_id="{{ $singledata['map_id'] }}"
                                                             data-user_id="{{ $singledata['user_id'] }}"
                                                             title="Update Client Data">Update Payment Status</button>
                                                         @else
@@ -226,6 +227,7 @@
                     <form id="paymentForm">
                         @csrf
                         <input type="hidden" name="id" id="id">
+                        <input type="hidden" name="map_id" id="map_id">
                         <input type="hidden" name="user_id" id="user_id">
                         <div class="modal-header">
                             <h5 class="modal-title" id="exampleModalLabel1">Payment Details</h5>
@@ -311,8 +313,9 @@
 
     function updateStatus(e) {
         $('#id').val($(e).attr('data-id'))
+        $('#map_id').val($(e).attr('data-map_id'))
         $('#user_id').val($(e).attr('data-user_id'))
-        $('#process').val('add');
+        $('#process').val('update');
         $('#basicModal').modal('show');
     }
 
