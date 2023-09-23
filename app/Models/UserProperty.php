@@ -23,9 +23,11 @@ class UserProperty extends Model
         'map_id',
         'user_id',
         'property_id',
-        'emi_amount',
-        'emi_count',
-        'first_emi_date',
+        'total_amount',
+        'total_amount_paid',
+        'flat_no',
+        'created_at',
+        'updated_at',
         'status',
     ];
 

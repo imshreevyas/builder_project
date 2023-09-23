@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('transaction_id')->nullable();
             $table->string('remark')->nullable();
             $table->integer('status')->default(0)->comment('0:pending,1:paid');
-            $table->integer('updated_by');
+            $table->integer('updated_by')->default(1);
             $table->timestamps();
         });
     }

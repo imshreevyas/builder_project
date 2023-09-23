@@ -44,9 +44,15 @@
                     <div class="container-xxl flex-grow-1 container-p-y">
                         <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">User Payments /</span> Manage
                         </h4>
+
                         <div class="card">
                             <div style="display: flex;">
-                                <h5 class="card-header">Manage User Payments</h5>
+                                <h5 class="card-header">Manage User Payments <button type="button"
+                                        class="btn btn-primary btn-sm" id="addUserPayment" name="addUserPayment"
+                                        onclick="addUserPayment(this)" data-map_id="{{ $map_id }}"
+                                        data-user_id="{{ $user_id }}" value="update">Add
+                                        User Payment </button></h5>
+
                             </div>
                             <div class="table table-responsive">
                                 <table id="table_id" class="display">
@@ -79,6 +85,7 @@
                                                 @if($singledata['status'] == 0)
                                                 <button type="button" class="btn btn-sm btn-danger"
                                                     onclick="updateStatus(this)" data-id="{{ $singledata['id'] }}"
+                                                    data-map_id="{{ $singledata['map_id'] }}"
                                                     data-user_id="{{ $singledata['user_id'] }}"
                                                     title="Update Client Data">Update Payment Status</button>
                                                 @else
@@ -109,10 +116,11 @@
     <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form id="paymentForm">
+                <form id="paymentUpdateForm">
                     @csrf
-                    <input type="hidden" name="id" id="id">
-                    <input type="hidden" name="user_id" id="user_id">
+                    <input type="hidden" name="id" id="id" class="id">
+                    <input type="hidden" name="map_id" id="map_id" class="map_id">
+                    <input type="hidden" name="user_id" id="user_id" class="user_id">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel1">Payment Details</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -144,10 +152,47 @@
                             Close
                         </button>
                     </div>
+                </form>
             </div>
-            </form>
         </div>
     </div>
+    <div class="modal fade" id="addUserPaymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="paymentAddForm">
+                    @csrf
+                    <input type="hidden" name="map_id" id="id" class="map_id">
+                    <input type="hidden" name="user_id" id="user_id" class="user_id">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel1">Add Payment Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        {{-- contact details --}}
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="firstName" class="form-label">Emi Amount</label>
+                                <input class="form-control" type="text" id="emi_amount" name="emi_amount"
+                                    placeholder="Enter EMI Amount" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="firstName" class="form-label">Emi Date</label>
+                                <input class="form-control" type="date" id="due_date" name="due_date" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary process" id="process" name="process"
+                            value="update">Add
+                            Payment</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">
+                            Close
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <style>
@@ -210,17 +255,43 @@
     });
 
     function updateStatus(e) {
-        $('#id').val($(e).attr('data-id'))
-        $('#user_id').val($(e).attr('data-user_id'))
-        $('#process').val('add');
+        $('.id').val($(e).attr('data-id'))
+        $('.map_id').val($(e).attr('data-map_id'))
+        $('.user_id').val($(e).attr('data-user_id'))
+        $('.process').val('update');
         $('#basicModal').modal('show');
     }
 
+    function addUserPayment(e) {
+        $('.map_id').val($(e).attr('data-map_id'))
+        $('.user_id').val($(e).attr('data-user_id'))
+        $('.process').val('add');
+        $('#addUserPaymentModal').modal('show');
+    }
 
-    $('#paymentForm').submit(function(e) {
+
+    $('#paymentAddForm').submit(function(e) {
         e.preventDefault();
         var formdata = new FormData(this);
-        formdata.append('process', $('#process').val());
+        formdata.append('process', $('.process').val());
+        axios.post(`${url}/admin/updateUserPaymentDetails`, formdata).then(function(response) {
+            // handle success
+            show_Toaster(response.data.message, response.data.type)
+            if (response.data.type === 'success') {
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
+            }
+        }).catch(function(err) {
+            show_Toaster(err.response.data.message, 'error')
+        })
+    });
+
+
+    $('#paymentUpdateForm').submit(function(e) {
+        e.preventDefault();
+        var formdata = new FormData(this);
+        formdata.append('process', $('.process').val());
         axios.post(`${url}/admin/updateUserPaymentDetails`, formdata).then(function(response) {
             // handle success
             show_Toaster(response.data.message, response.data.type)

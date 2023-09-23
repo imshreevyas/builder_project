@@ -15,12 +15,12 @@ return new class extends Migration
     {
         Schema::create('user_properties', function (Blueprint $table) {
             $table->id();
-            $table->integer('map_id');
+            $table->string('map_id');
             $table->integer('user_id');
             $table->integer('property_id');
-            $table->integer('emi_amount')->default(0);
-            $table->integer('emi_count')->default(0);
-            $table->date('first_emi_date');
+            $table->integer('total_amount')->default(0);
+            $table->integer('total_amount_paid')->default(0);
+            $table->integer('flat_no')->default(0);
             $table->integer('status')->default(1)->comment('1:ongoing,0:closed');
             $table->timestamps();
         });
