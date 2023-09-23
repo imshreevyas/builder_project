@@ -36,7 +36,7 @@ return [
     'mailers' => [
         'smtp' => [
             'transport' => 'smtp',
-            'host' => env('MAIL_HOST', 'mail.darshinal.com'),
+            'host' => env('MAIL_HOST', 'smtp.hostinger.com'),
             'port' => env('MAIL_PORT', 465),
             'encryption' => env('MAIL_ENCRYPTION', 'ssl'),
             'username' => env('MAIL_USERNAME'),
@@ -92,8 +92,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'qrcode_feedback@darshinal.com'),
-        'name' => env('MAIL_FROM_NAME', 'Darshinal Qr Software'),
+        'address' => env('MAIL_FROM_ADDRESS', 'socialmedia@stickermajesty.com'),
+        'name' => env('MAIL_FROM_NAME', 'Sticker Majesty'),
     ],
 
     /*

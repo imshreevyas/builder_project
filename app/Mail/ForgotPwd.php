@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class forgetPwd extends Mailable
+class ForgotPwd extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -33,7 +33,7 @@ class forgetPwd extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'New Password - HRA',
+            subject: 'New Password - AimGroup',
         );
     }
 

@@ -35,4 +35,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/resetPassword', [Api::class, 'resetPassword'])->name('resetPassword');
     Route::post('/logout',[Api::class,'userLogout'])->name('logout');
 });
-
+Route::post('/forgotPwd',[Api::class,'forgotPassword'])->name('forgotPwd');

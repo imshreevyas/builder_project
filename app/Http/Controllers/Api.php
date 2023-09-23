@@ -9,6 +9,8 @@ use App\Models\UserProperty;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ForgotPwd;
 
 class Api extends Controller
 {
@@ -48,10 +50,11 @@ class Api extends Controller
 
         return response()->json(['message' => 'No image uploaded', 'status' => 'fail'], 400);
     }
-    public function updateNotificationId(Request $request){
+    public function updateNotificationId(Request $request)
+    {
         if ($request->notificationId) {
             if (User::where('id', $request->user()->id)->update(['expo_push_token' => $request->notificationId]))
-            return response()->json(['message' => 'Token updated successfully', 'status' => 'success']);
+                return response()->json(['message' => 'Token updated successfully', 'status' => 'success']);
         }
 
         return response()->json(['message' => 'Please pass token', 'status' => 'fail'], 400);
@@ -125,10 +128,32 @@ class Api extends Controller
         if (User::where('id', $request->user()->id)->update($pass))
             return response()->json([
                 'message' => 'Password changed successfully!',
-                'status' => 1
+                'status' => 'success'
             ], 200);
         else
-            return response()->json(['message' => 'Something went wrong!', 'status' => 0], 401);
+            return response()->json(['message' => 'Something went wrong!', 'status' => 'fail'], 401);
+    }
+    public function forgotPassword(Request $request)
+    {
+        $data = $request->validate([
+            'email' => 'required',
+        ]);
+        $randNum = rand(11111, 99999);
+        $pass['password'] = Hash::make($randNum);
+        $pass['dcrypt_password'] = $randNum;
+        $user = User::where('email', $data['email'])->first();
+        if ($user) {
+            $mailData = [
+                'email' => $data['email'],
+                'pwd' => $randNum
+            ];
+            Mail::to($data['email'])->send(new ForgotPwd($mailData));
+            User::where('email', $data['email'])->update($pass);
+            return response()->json(['message' => 'Email Verified successfully'], 201);
+        } else {
+            return response()->json(['message' => 'Email not found'], 409);
+        }
+        return response()->json(['message' => 'Something went wrong!', 'status' => 'fail'], 401);
     }
     public function userLogout(Request $request)
     {
