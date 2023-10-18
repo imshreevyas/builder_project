@@ -1227,5 +1227,62 @@ class Controller extends BaseController
     public function createPassword($password) {
       echo bcrypt($password);
     }
+
+    public function sendReminder(Request $request){
+
+      $data = $request->validate([
+        'user_id' => 'required|int',
+        'id' => 'required|int',
+      ]);
+
+      $userData = optional(User::where(['id' => $data['user_id']])->get())->toArray();
+      $paymentData = optional(Payment::where(['id' => $data['id']])->get())->toArray();
+
+      if(count($userData) > 0 && count($paymentData) > 0){
+        $expo_push_token = $userData[0]['expo_push_token'];
+        
+
+        // dd($expo_push_token);
+        $sendData['to'] = $expo_push_token;
+        $sendData['title'] = 'Payment Reminder'; 
+        $sendData['body'] = 'Hello '.$userData[0]['name'].' , This is the EMI Reminder of amount '.$paymentData[0]['emi_amount'].', Ignore if Paid.';
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+          CURLOPT_URL => 'https://exp.host/--/api/v2/push/send',
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => '',
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 0,
+          CURLOPT_FOLLOWLOCATION => true,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => 'POST',
+          CURLOPT_POSTFIELDS => $sendData,
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        $response  = json_decode($response,true);
+
+        if($response['data']['status'] == 'ok'){
+          return response()->json([
+            'message'=> 'Notification send Successfully!',
+            'type'=>'success'
+          ]); 
+        }else{
+          return response()->json([
+            'message'=> 'Something went wrong, try later',
+            'type'=>'error'
+          ]);
+        }
+      }else{
+        return response()->json([
+          'message'=> 'Invalid User',
+          'type'=>'error'
+        ]);
+      }
+    }
     
   }

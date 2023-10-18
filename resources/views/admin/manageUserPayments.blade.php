@@ -88,6 +88,10 @@
                                                     data-map_id="{{ $singledata['map_id'] }}"
                                                     data-user_id="{{ $singledata['user_id'] }}"
                                                     title="Update Client Data">Update Payment Status</button>
+                                                <button type="button" class="btn btn-sm btn-primary"
+                                                    onclick="sendReminder('{{ $singledata['user_id'] }}','{{ $singledata['id'] }}')">Send
+                                                    EMI
+                                                    Reminder</button>
                                                 @else
                                                 ----
                                                 @endif
@@ -286,6 +290,18 @@
             show_Toaster(err.response.data.message, 'error')
         })
     });
+
+    function sendReminder(user_id, id) {
+        var formdata = new FormData();
+        formdata.append('user_id', user_id);
+        formdata.append('id', id);
+        axios.post(`${url}/admin/sendReminder`, formdata).then(function(response) {
+            // handle success
+            show_Toaster(response.data.message, response.data.type);
+        }).catch(function(err) {
+            show_Toaster(err.response.data.message, 'error')
+        })
+    };
 
 
     $('#paymentUpdateForm').submit(function(e) {

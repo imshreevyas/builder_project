@@ -113,5 +113,6 @@ Route::prefix('admin')->group(function () {
     Route::post('/sendOtp',[Controller::class,'sendOtp'])->name('sendOtp');
     Route::get('/forgot-password',[Controller::class,'forgotPassword'])->name('forgot-password');
     Route::post('/settings',[Controller::class,'settings'])->name('settings');
+    Route::post('/sendReminder',[Controller::class,'sendReminder'])->name('sendReminder');
     Route::get('/adminLogout',[Controller::class,'adminLogout'])->name('adminLogout');
 });
